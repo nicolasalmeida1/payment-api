@@ -1,5 +1,5 @@
 import { env } from '../config/env.js';
-console.warn('ENV', env);
+
 export default {
   development: {
     client: 'pg',
