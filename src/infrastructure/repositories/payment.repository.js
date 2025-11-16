@@ -23,6 +23,7 @@ export default class PaymentRepository {
 
   async create(paymentData, trx) {
     this.logger.debug('Creating payment', { paymentId: paymentData.id });
+
     return Payment.query(trx).insert(paymentData);
   }
 
@@ -49,6 +50,7 @@ export default class PaymentRepository {
 
       if (updatedPayment === 0) {
         this.logger.warn('Payment not found for update', { paymentId: id });
+
         return null;
       }
 

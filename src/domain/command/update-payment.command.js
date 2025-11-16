@@ -12,6 +12,7 @@ export default class UpdatePaymentCommand extends BaseCommand {
       const validatedData = this.validate(updatePaymentSchema, input, {
         paymentId: id,
       });
+
       return await this.updatePaymentService.execute(id, validatedData);
     } catch (error) {
       return this.handleError(error, { paymentId: id });

@@ -9,6 +9,7 @@ export default class GetPaymentByIdCommand extends BaseCommand {
   async execute(id) {
     try {
       this.logger.debug('Executing command', { paymentId: id });
+
       return await this.getPaymentByIdService.execute(id);
     } catch (error) {
       return this.handleError(error, { paymentId: id });

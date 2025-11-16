@@ -15,6 +15,7 @@ export default class UpdatePaymentService {
     if (validatedData.description)
       updateData.description = validatedData.description;
     if (validatedData.amount) updateData.amount = validatedData.amount;
+
     return updateData;
   }
 

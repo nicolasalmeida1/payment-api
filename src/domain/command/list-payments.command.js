@@ -12,6 +12,7 @@ export default class ListPaymentsCommand extends BaseCommand {
       const validatedData = this.validate(listPaymentsSchema, filters, {
         filters,
       });
+
       return await this.listPaymentsService.execute(validatedData);
     } catch (error) {
       return this.handleError(error);

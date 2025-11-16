@@ -10,6 +10,7 @@ export default class CreatePaymentCommand extends BaseCommand {
   async execute(input) {
     try {
       const validatedData = this.validate(createPaymentSchema, input);
+
       return await this.createPaymentService.execute(validatedData);
     } catch (error) {
       return this.handleError(error);
