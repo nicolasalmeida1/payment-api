@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import Logger from '../../infrastructure/logger/logger.js';
 import { PaymentStatus, PaymentEvent, PaymentMethod } from '../enums/index.js';
+import { startCreditCardPaymentWorkflow } from '../../temporal/client.js';
 
 export default class CreatePaymentService {
   constructor({ paymentRepository, paymentHistoryRepository, mercadoPagoService }) {
@@ -8,6 +9,7 @@ export default class CreatePaymentService {
     this.paymentHistoryRepository = paymentHistoryRepository;
     this.mercadoPagoService = mercadoPagoService;
     this.logger = new Logger(this.constructor.name);
+    this.useTemporalWorkflow = process.env.USE_TEMPORAL_WORKFLOW === 'true';
   }
 
   getPaymentData(validatedData, paymentId) {
@@ -88,15 +90,44 @@ export default class CreatePaymentService {
       });
 
       let mercadoPagoData = null;
+      let workflowData = null;
 
       if (validatedData.paymentMethod === PaymentMethod.CREDIT_CARD) {
-        mercadoPagoData = await this.processCreditCardPayment(payment);
+        if (this.useTemporalWorkflow) {
+          this.logger.info('Starting Temporal workflow for credit card payment', {
+            paymentId: payment.id,
+          });
+
+          try {
+            workflowData = await startCreditCardPaymentWorkflow({
+              id: payment.id,
+              cpf: payment.cpf,
+              description: payment.description,
+              amount: payment.amount,
+              paymentMethod: payment.payment_method,
+            });
+
+            this.logger.info('Temporal workflow started successfully', {
+              paymentId: payment.id,
+              workflowId: workflowData.workflowId,
+            });
+          } catch (error) {
+            this.logger.error('Error starting Temporal workflow', {
+              error: error.message,
+              stack: error.stack,
+              paymentId: payment.id,
+            });
+          }
+        } else {
+          mercadoPagoData = await this.processCreditCardPayment(payment);
+        }
       }
 
       return {
         success: true,
         data: payment,
         mercadoPago: mercadoPagoData,
+        workflow: workflowData,
       };
     } catch (error) {
       await this.paymentRepository.rollbackTransaction();
