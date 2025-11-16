@@ -1,13 +1,20 @@
 import { Worker } from '@temporalio/worker';
 import * as activities from './activities/payment.activities.js';
 import Logger from '../infrastructure/logger/logger.js';
+import { fileURLToPath } from 'url';
+import path from 'path';
 
 const logger = new Logger('TemporalWorker');
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 export async function createWorker() {
   try {
+    const workflowsPath = path.join(__dirname, 'workflows');
+
     const worker = await Worker.create({
-      workflowsPath: new URL('./workflows/credit-card-payment.workflow.js', import.meta.url).pathname,
+      workflowsPath,
       activities,
       taskQueue: 'payment-queue',
       maxConcurrentActivityTaskExecutions: 10,
