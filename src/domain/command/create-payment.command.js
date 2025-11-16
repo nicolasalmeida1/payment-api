@@ -1,18 +1,26 @@
 import createPaymentSchema from '../validators/create-payment.validator.js';
+import Logger from '../../infrastructure/logger/logger.js';
 
 export default class CreatePaymentCommand {
   constructor({ createPaymentService }) {
     this.createPaymentService = createPaymentService;
+    this.logger = new Logger('CreatePaymentCommand');
   }
 
   async execute(input) {
     try {
+      this.logger.debug('Validating create payment input', { input });
+
       const { error, value } = createPaymentSchema.validate(input, {
         abortEarly: false,
       });
 
       if (error) {
         const errorMessages = error.details.map((detail) => detail.message);
+        this.logger.warn('Validation failed', {
+          errors: errorMessages,
+          input,
+        });
         throw new Error(`Validation failed: ${errorMessages.join(', ')}`);
       }
 
@@ -20,7 +28,10 @@ export default class CreatePaymentCommand {
 
       return result;
     } catch (error) {
-      console.log(error);
+      this.logger.error('Error in create payment command', {
+        error: error.message,
+        stack: error.stack,
+      });
 
       throw error;
     }
