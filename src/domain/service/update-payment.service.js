@@ -1,11 +1,44 @@
 import Logger from '../../infrastructure/logger/logger.js';
 import { PaymentEvent } from '../enums/index.js';
+import { PaymentNotFoundError } from '../errors/domain.errors.js';
 
 export default class UpdatePaymentService {
   constructor({ paymentRepository, paymentHistoryRepository }) {
     this.paymentRepository = paymentRepository;
     this.paymentHistoryRepository = paymentHistoryRepository;
     this.logger = new Logger(this.constructor.name);
+  }
+
+  buildUpdateData(validatedData) {
+    const updateData = {};
+    if (validatedData.status) updateData.status = validatedData.status;
+    if (validatedData.description)
+      updateData.description = validatedData.description;
+    if (validatedData.amount) updateData.amount = validatedData.amount;
+    return updateData;
+  }
+
+  shouldCreateHistoryEntry(validatedData, existingPayment) {
+    return (
+      validatedData.status && validatedData.status !== existingPayment.status
+    );
+  }
+
+  async createStatusHistoryEntry(id, oldStatus, newStatus) {
+    this.logger.debug('Status changed, creating history entry', {
+      paymentId: id,
+      oldStatus,
+      newStatus,
+    });
+
+    await this.paymentHistoryRepository.create({
+      payment_id: id,
+      event: PaymentEvent.PAYMENT_STATUS_CHANGED,
+      event_data: {
+        old_status: oldStatus,
+        new_status: newStatus,
+      },
+    });
   }
 
   async execute(id, validatedData) {
@@ -16,38 +49,21 @@ export default class UpdatePaymentService {
 
       if (!existingPayment) {
         this.logger.warn('Payment not found', { paymentId: id });
-        throw new Error('Payment not found');
+        throw new PaymentNotFoundError(id);
       }
 
-      const updateData = {};
-      if (validatedData.status) updateData.status = validatedData.status;
-      if (validatedData.description)
-        updateData.description = validatedData.description;
-      if (validatedData.amount) updateData.amount = validatedData.amount;
-
+      const updateData = this.buildUpdateData(validatedData);
       const updatedPayment = await this.paymentRepository.update(
         id,
         updateData,
       );
 
-      if (
-        validatedData.status &&
-        validatedData.status !== existingPayment.status
-      ) {
-        this.logger.debug('Status changed, creating history entry', {
-          paymentId: id,
-          oldStatus: existingPayment.status,
-          newStatus: validatedData.status,
-        });
-
-        await this.paymentHistoryRepository.create({
-          payment_id: id,
-          event: PaymentEvent.PAYMENT_STATUS_CHANGED,
-          event_data: {
-            old_status: existingPayment.status,
-            new_status: validatedData.status,
-          },
-        });
+      if (this.shouldCreateHistoryEntry(validatedData, existingPayment)) {
+        await this.createStatusHistoryEntry(
+          id,
+          existingPayment.status,
+          validatedData.status,
+        );
       }
 
       this.logger.info('Payment updated successfully', { paymentId: id });
