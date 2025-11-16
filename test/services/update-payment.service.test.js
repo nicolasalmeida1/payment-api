@@ -123,6 +123,45 @@ describe('UpdatePaymentService', () => {
       expect(mockPaymentRepository.commitTransaction).toHaveBeenCalled();
     });
 
+    it('should update amount without creating history', async () => {
+      const id = '550e8400-e29b-41d4-a716-446655440000';
+      const validatedData = {
+        amount: 200.75,
+      };
+
+      const existingPayment = {
+        id,
+        cpf: '12345678901',
+        description: 'Test payment',
+        amount: 100.5,
+        payment_method: 'PIX',
+        status: 'PENDING',
+      };
+
+      const updatedPayment = {
+        ...existingPayment,
+        amount: 200.75,
+      };
+
+      mockPaymentRepository.findById.mockResolvedValue(existingPayment);
+      mockPaymentRepository.startTransaction.mockResolvedValue({});
+      mockPaymentRepository.update.mockResolvedValue(updatedPayment);
+      mockPaymentRepository.commitTransaction.mockResolvedValue();
+
+      const result = await service.execute(id, validatedData);
+
+      expect(result).toEqual({
+        success: true,
+        data: updatedPayment,
+      });
+
+      expect(mockPaymentRepository.update).toHaveBeenCalledWith(id, {
+        amount: 200.75,
+      });
+      expect(mockPaymentHistoryRepository.create).not.toHaveBeenCalled();
+      expect(mockPaymentRepository.commitTransaction).toHaveBeenCalled();
+    });
+
     it('should throw error when payment not found', async () => {
       const id = '550e8400-e29b-41d4-a716-446655440000';
       const validatedData = {
