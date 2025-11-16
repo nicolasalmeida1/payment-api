@@ -19,7 +19,9 @@
     "seed:run": "knex seed:run",
     "worker": "node src/temporal/start-worker.js",
     "temporal:worker": "node src/temporal/start-worker.js",
-    "temporal:dev": "temporal server start-dev"
+    "temporal:dev": "temporal server start-dev",
+    "docs": "jsdoc -c jsdoc.conf.json",
+    "docs:serve": "npm run docs && npx http-server docs/jsdoc -p 8080"
   },
   "author": "Nicolas Gabriel de Almeida",
   "license": "ISC",
@@ -48,6 +50,7 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-prettier": "^5.5.4",
     "jest": "^30.2.0",
+    "jsdoc": "^4.0.5",
     "nock": "^14.0.10",
     "prettier": "3.6.2"
   }
