@@ -1,4 +1,5 @@
 import Logger from '../../infrastructure/logger/logger.js';
+import { PaymentNotFoundError } from '../errors/domain.errors.js';
 
 export default class GetPaymentByIdService {
   constructor({ paymentRepository }) {
@@ -14,7 +15,7 @@ export default class GetPaymentByIdService {
 
       if (!payment) {
         this.logger.warn('Payment not found', { paymentId: id });
-        throw new Error('Payment not found');
+        throw new PaymentNotFoundError(id);
       }
 
       this.logger.info('Payment fetched successfully', { paymentId: id });
