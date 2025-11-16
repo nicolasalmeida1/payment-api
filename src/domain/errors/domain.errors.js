@@ -20,3 +20,10 @@ export class ValidationError extends DomainError {
     this.errors = errors;
   }
 }
+
+export class PaymentAlreadyPaidError extends DomainError {
+  constructor(paymentId) {
+    super(`Payment already paid and cannot be modified: ${paymentId}`, 400);
+    this.paymentId = paymentId;
+  }
+}

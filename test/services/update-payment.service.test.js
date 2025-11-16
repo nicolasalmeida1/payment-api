@@ -166,6 +166,31 @@ describe('UpdatePaymentService', () => {
       expect(mockPaymentRepository.commitTransaction).toHaveBeenCalled();
     });
 
+    it('should throw error when trying to update a paid payment', async () => {
+      const id = '550e8400-e29b-41d4-a716-446655440000';
+      const validatedData = {
+        description: 'New description',
+      };
+
+      const paidPayment = {
+        id,
+        cpf: '12345678901',
+        description: 'Test payment',
+        amount: 100.5,
+        payment_method: 'PIX',
+        status: 'PAID',
+      };
+
+      mockPaymentRepository.findById.mockResolvedValue(paidPayment);
+
+      await expect(service.execute(id, validatedData)).rejects.toThrow(
+        'Payment already paid and cannot be modified',
+      );
+
+      expect(mockPaymentRepository.startTransaction).not.toHaveBeenCalled();
+      expect(mockPaymentRepository.update).not.toHaveBeenCalled();
+    });
+
     it('should handle repository errors', async () => {
       const id = '550e8400-e29b-41d4-a716-446655440000';
       const validatedData = {

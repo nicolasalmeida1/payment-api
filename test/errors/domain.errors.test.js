@@ -2,6 +2,7 @@ import {
   DomainError,
   PaymentNotFoundError,
   ValidationError,
+  PaymentAlreadyPaidError,
 } from '../../src/domain/errors/domain.errors.js';
 
 describe('Domain Errors', () => {
@@ -47,6 +48,21 @@ describe('Domain Errors', () => {
       expect(error.statusCode).toBe(422);
       expect(error.errors).toEqual(errors);
       expect(error.name).toBe('ValidationError');
+    });
+  });
+
+  describe('PaymentAlreadyPaidError', () => {
+    it('should create a payment already paid error', () => {
+      const paymentId = '123';
+      const error = new PaymentAlreadyPaidError(paymentId);
+
+      expect(error).toBeInstanceOf(DomainError);
+      expect(error.message).toBe(
+        'Payment already paid and cannot be modified: 123',
+      );
+      expect(error.statusCode).toBe(400);
+      expect(error.paymentId).toBe(paymentId);
+      expect(error.name).toBe('PaymentAlreadyPaidError');
     });
   });
 });

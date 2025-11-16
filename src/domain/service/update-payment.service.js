@@ -1,6 +1,9 @@
 import Logger from '../../infrastructure/logger/logger.js';
-import { PaymentEvent } from '../enums/index.js';
-import { PaymentNotFoundError } from '../errors/domain.errors.js';
+import { PaymentEvent, PaymentStatus } from '../enums/index.js';
+import {
+  PaymentNotFoundError,
+  PaymentAlreadyPaidError,
+} from '../errors/domain.errors.js';
 
 export default class UpdatePaymentService {
   constructor({ paymentRepository, paymentHistoryRepository }) {
@@ -51,6 +54,14 @@ export default class UpdatePaymentService {
       if (!existingPayment) {
         this.logger.warn('Payment not found', { paymentId: id });
         throw new PaymentNotFoundError(id);
+      }
+
+      if (existingPayment.status === PaymentStatus.PAID) {
+        this.logger.warn('Attempt to update paid payment', {
+          paymentId: id,
+          currentStatus: existingPayment.status,
+        });
+        throw new PaymentAlreadyPaidError(id);
       }
 
       await this.paymentRepository.startTransaction();
