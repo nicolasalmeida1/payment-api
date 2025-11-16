@@ -2,9 +2,8 @@ import { createPaymentSchema } from '../../src/domain/validators/create-payment.
 
 describe('CreatePaymentValidator', () => {
   describe('Valid data', () => {
-    it('should validate correct payment data', () => {
+    it('should validate correct payment data without id', () => {
       const validData = {
-        id: '550e8400-e29b-41d4-a716-446655440000',
         cpf: '12345678901',
         description: 'Test payment',
         amount: 100.5,
@@ -19,7 +18,6 @@ describe('CreatePaymentValidator', () => {
 
     it('should validate with CREDIT_CARD payment method', () => {
       const validData = {
-        id: '550e8400-e29b-41d4-a716-446655440000',
         cpf: '12345678901',
         description: 'Test payment',
         amount: 100.5,
@@ -32,41 +30,9 @@ describe('CreatePaymentValidator', () => {
     });
   });
 
-  describe('Invalid id', () => {
-    it('should fail when id is missing', () => {
-      const invalidData = {
-        cpf: '12345678901',
-        description: 'Test payment',
-        amount: 100.5,
-        paymentMethod: 'PIX',
-      };
-
-      const { error } = createPaymentSchema.validate(invalidData);
-
-      expect(error).toBeDefined();
-      expect(error.details[0].message).toBe('id is required');
-    });
-
-    it('should fail when id is not a valid UUID', () => {
-      const invalidData = {
-        id: 'invalid-uuid',
-        cpf: '12345678901',
-        description: 'Test payment',
-        amount: 100.5,
-        paymentMethod: 'PIX',
-      };
-
-      const { error } = createPaymentSchema.validate(invalidData);
-
-      expect(error).toBeDefined();
-      expect(error.details[0].message).toBe('id must be a valid UUID');
-    });
-  });
-
   describe('Invalid cpf', () => {
     it('should fail when cpf is missing', () => {
       const invalidData = {
-        id: '550e8400-e29b-41d4-a716-446655440000',
         description: 'Test payment',
         amount: 100.5,
         paymentMethod: 'PIX',
@@ -80,7 +46,6 @@ describe('CreatePaymentValidator', () => {
 
     it('should fail when cpf does not have 11 digits', () => {
       const invalidData = {
-        id: '550e8400-e29b-41d4-a716-446655440000',
         cpf: '123456789',
         description: 'Test payment',
         amount: 100.5,
@@ -97,7 +62,6 @@ describe('CreatePaymentValidator', () => {
 
     it('should fail when cpf contains non-numeric characters', () => {
       const invalidData = {
-        id: '550e8400-e29b-41d4-a716-446655440000',
         cpf: '123.456.789-01',
         description: 'Test payment',
         amount: 100.5,
@@ -113,7 +77,6 @@ describe('CreatePaymentValidator', () => {
   describe('Invalid description', () => {
     it('should fail when description is missing', () => {
       const invalidData = {
-        id: '550e8400-e29b-41d4-a716-446655440000',
         cpf: '12345678901',
         amount: 100.5,
         paymentMethod: 'PIX',
@@ -127,7 +90,6 @@ describe('CreatePaymentValidator', () => {
 
     it('should fail when description is empty', () => {
       const invalidData = {
-        id: '550e8400-e29b-41d4-a716-446655440000',
         cpf: '12345678901',
         description: '',
         amount: 100.5,
@@ -144,7 +106,6 @@ describe('CreatePaymentValidator', () => {
   describe('Invalid amount', () => {
     it('should fail when amount is missing', () => {
       const invalidData = {
-        id: '550e8400-e29b-41d4-a716-446655440000',
         cpf: '12345678901',
         description: 'Test payment',
         paymentMethod: 'PIX',
@@ -158,7 +119,6 @@ describe('CreatePaymentValidator', () => {
 
     it('should fail when amount is negative', () => {
       const invalidData = {
-        id: '550e8400-e29b-41d4-a716-446655440000',
         cpf: '12345678901',
         description: 'Test payment',
         amount: -10,
@@ -173,7 +133,6 @@ describe('CreatePaymentValidator', () => {
 
     it('should fail when amount is zero', () => {
       const invalidData = {
-        id: '550e8400-e29b-41d4-a716-446655440000',
         cpf: '12345678901',
         description: 'Test payment',
         amount: 0,
@@ -189,7 +148,6 @@ describe('CreatePaymentValidator', () => {
   describe('Invalid paymentMethod', () => {
     it('should fail when paymentMethod is missing', () => {
       const invalidData = {
-        id: '550e8400-e29b-41d4-a716-446655440000',
         cpf: '12345678901',
         description: 'Test payment',
         amount: 100.5,
@@ -203,7 +161,6 @@ describe('CreatePaymentValidator', () => {
 
     it('should fail when paymentMethod is invalid', () => {
       const invalidData = {
-        id: '550e8400-e29b-41d4-a716-446655440000',
         cpf: '12345678901',
         description: 'Test payment',
         amount: 100.5,

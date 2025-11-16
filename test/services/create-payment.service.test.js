@@ -32,134 +32,92 @@ describe('CreatePaymentService', () => {
   });
 
   describe('execute', () => {
-    it('should create PIX payment with PENDING status', async () => {
+    it('should create PIX payment with PENDING status and generated ID', async () => {
       const validatedData = {
-        id: '550e8400-e29b-41d4-a716-446655440000',
         cpf: '12345678901',
         description: 'PIX payment test',
         amount: 100.5,
         paymentMethod: 'PIX',
       };
 
-      const expectedPayment = {
-        id: validatedData.id,
-        cpf: validatedData.cpf,
-        description: validatedData.description,
-        amount: validatedData.amount,
-        payment_method: 'PIX',
-        status: 'PENDING',
-      };
-
       mockPaymentRepository.startTransaction.mockResolvedValue({});
-      mockPaymentRepository.create.mockResolvedValue(expectedPayment);
+      mockPaymentRepository.create.mockImplementation((data) => ({
+        ...data,
+        id: data.id,
+      }));
       mockPaymentHistoryRepository.create.mockResolvedValue({});
       mockPaymentRepository.commitTransaction.mockResolvedValue();
 
       const result = await service.execute(validatedData);
 
-      expect(result).toEqual({
-        success: true,
-        data: expectedPayment,
-      });
-
-      expect(expectedPayment.payment_method).toBe('PIX');
-      expect(expectedPayment.status).toBe('PENDING');
-
-      expect(mockPaymentRepository.create).toHaveBeenCalledWith({
-        id: validatedData.id,
+      expect(result.success).toBe(true);
+      expect(result.data).toMatchObject({
         cpf: validatedData.cpf,
         description: validatedData.description,
         amount: validatedData.amount,
         payment_method: 'PIX',
         status: 'PENDING',
       });
+      expect(result.data.id).toBeDefined();
+      expect(typeof result.data.id).toBe('string');
 
-      expect(service.logger.info).toHaveBeenCalledWith('Creating payment', {
-        paymentId: validatedData.id,
-        cpf: validatedData.cpf,
-        amount: validatedData.amount,
-        paymentMethod: 'PIX',
-      });
+      const createCall = mockPaymentRepository.create.mock.calls[0][0];
+
+      expect(createCall.id).toBeDefined();
+      expect(typeof createCall.id).toBe('string');
+      expect(createCall.payment_method).toBe('PIX');
+      expect(createCall.status).toBe('PENDING');
     });
 
-    it('should create payment successfully', async () => {
+    it('should create payment successfully with generated ID', async () => {
       const validatedData = {
-        id: '550e8400-e29b-41d4-a716-446655440000',
         cpf: '12345678901',
         description: 'Test payment',
         amount: 100.5,
         paymentMethod: 'PIX',
       };
 
-      const expectedPayment = {
-        id: validatedData.id,
-        cpf: validatedData.cpf,
-        description: validatedData.description,
-        amount: validatedData.amount,
-        payment_method: 'PIX',
-        status: 'PENDING',
-      };
-
       mockPaymentRepository.startTransaction.mockResolvedValue({});
-      mockPaymentRepository.create.mockResolvedValue(expectedPayment);
+      mockPaymentRepository.create.mockImplementation((data) => ({
+        ...data,
+        id: data.id,
+      }));
       mockPaymentHistoryRepository.create.mockResolvedValue({});
       mockPaymentRepository.commitTransaction.mockResolvedValue();
 
       const result = await service.execute(validatedData);
 
-      expect(result).toEqual({
-        success: true,
-        data: expectedPayment,
-      });
+      expect(result.success).toBe(true);
+      expect(result.data.id).toBeDefined();
+      expect(typeof result.data.id).toBe('string');
 
       expect(mockPaymentRepository.startTransaction).toHaveBeenCalled();
       expect(mockPaymentHistoryRepository.setTransaction).toHaveBeenCalledWith(
         mockPaymentRepository.trx,
       );
 
-      expect(mockPaymentRepository.create).toHaveBeenCalledWith({
-        id: validatedData.id,
+      const createPaymentCall = mockPaymentRepository.create.mock.calls[0][0];
+
+      expect(createPaymentCall).toMatchObject({
         cpf: validatedData.cpf,
         description: validatedData.description,
         amount: validatedData.amount,
         payment_method: 'PIX',
         status: 'PENDING',
       });
+      expect(createPaymentCall.id).toBeDefined();
 
-      expect(mockPaymentHistoryRepository.create).toHaveBeenCalledWith({
-        payment_id: validatedData.id,
-        event: 'PAYMENT_CREATED',
-        event_data: {
-          cpf: validatedData.cpf,
-          description: validatedData.description,
-          amount: validatedData.amount,
-          payment_method: 'PIX',
-          status: 'PENDING',
-        },
-      });
+      const createHistoryCall =
+        mockPaymentHistoryRepository.create.mock.calls[0][0];
+
+      expect(createHistoryCall.payment_id).toBe(createPaymentCall.id);
+      expect(createHistoryCall.event).toBe('PAYMENT_CREATED');
 
       expect(mockPaymentRepository.commitTransaction).toHaveBeenCalled();
-
-      expect(service.logger.info).toHaveBeenCalledWith('Creating payment', {
-        paymentId: validatedData.id,
-        cpf: validatedData.cpf,
-        amount: validatedData.amount,
-        paymentMethod: 'PIX',
-      });
-
-      expect(service.logger.info).toHaveBeenCalledWith(
-        'Payment created successfully',
-        {
-          paymentId: expectedPayment.id,
-          paymentMethod: 'PIX',
-          status: 'PENDING',
-        },
-      );
     });
 
     it('should handle repository errors', async () => {
       const validatedData = {
-        id: '550e8400-e29b-41d4-a716-446655440000',
         cpf: '12345678901',
         description: 'Test payment',
         amount: 100.5,
@@ -176,14 +134,12 @@ describe('CreatePaymentService', () => {
       );
 
       expect(mockPaymentRepository.rollbackTransaction).toHaveBeenCalled();
-      expect(service.logger.error).toHaveBeenCalledWith(
-        'Error creating payment',
-        {
-          error: error.message,
-          stack: error.stack,
-          paymentId: validatedData.id,
-        },
-      );
+
+      const errorCall = service.logger.error.mock.calls[0];
+
+      expect(errorCall[0]).toBe('Error creating payment');
+      expect(errorCall[1].error).toBe(error.message);
+      expect(errorCall[1].paymentId).toBeDefined();
     });
   });
 });

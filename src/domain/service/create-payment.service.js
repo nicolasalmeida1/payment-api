@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import Logger from '../../infrastructure/logger/logger.js';
 import { PaymentStatus, PaymentEvent } from '../enums/index.js';
 
@@ -8,9 +9,9 @@ export default class CreatePaymentService {
     this.logger = new Logger(this.constructor.name);
   }
 
-  getPaymentData(validatedData) {
+  getPaymentData(validatedData, paymentId) {
     return {
-      id: validatedData.id,
+      id: paymentId,
       cpf: validatedData.cpf,
       description: validatedData.description,
       amount: validatedData.amount,
@@ -19,9 +20,9 @@ export default class CreatePaymentService {
     };
   }
 
-  getHistoryData(validatedData) {
+  getHistoryData(validatedData, paymentId) {
     return {
-      payment_id: validatedData.id,
+      payment_id: paymentId,
       event: PaymentEvent.PAYMENT_CREATED,
       event_data: {
         cpf: validatedData.cpf,
@@ -34,8 +35,10 @@ export default class CreatePaymentService {
   }
 
   async execute(validatedData) {
+    const paymentId = randomUUID();
+
     this.logger.info('Creating payment', {
-      paymentId: validatedData.id,
+      paymentId,
       cpf: validatedData.cpf,
       amount: validatedData.amount,
       paymentMethod: validatedData.paymentMethod,
@@ -45,8 +48,8 @@ export default class CreatePaymentService {
       await this.paymentRepository.startTransaction();
       this.paymentHistoryRepository.setTransaction(this.paymentRepository.trx);
 
-      const paymentData = this.getPaymentData(validatedData);
-      const historyData = this.getHistoryData(validatedData);
+      const paymentData = this.getPaymentData(validatedData, paymentId);
+      const historyData = this.getHistoryData(validatedData, paymentId);
 
       const payment = await this.paymentRepository.create(paymentData);
       await this.paymentHistoryRepository.create(historyData);
@@ -68,7 +71,7 @@ export default class CreatePaymentService {
       this.logger.error('Error creating payment', {
         error: error.message,
         stack: error.stack,
-        paymentId: validatedData.id,
+        paymentId,
       });
       throw error;
     }

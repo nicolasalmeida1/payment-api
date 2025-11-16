@@ -2,10 +2,6 @@ import Joi from 'joi';
 import { PaymentMethod } from '../enums/index.js';
 
 export const createPaymentSchema = Joi.object({
-  id: Joi.string().uuid().required().messages({
-    'string.guid': 'id must be a valid UUID',
-    'any.required': 'id is required',
-  }),
   cpf: Joi.string()
     .pattern(/^\d{11}$/)
     .required()
