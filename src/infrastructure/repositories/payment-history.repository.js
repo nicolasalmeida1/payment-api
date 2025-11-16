@@ -13,11 +13,6 @@ export default class PaymentHistoryRepository extends BaseRepository {
    * @returns {Promise<PaymentHistory>} Created history record
    */
   async create(historyData) {
-    this.logger.debug('Creating payment history entry', {
-      paymentId: historyData.payment_id,
-      event: historyData.event,
-    });
-
     const history = await PaymentHistory.query(this.trx).insert(historyData);
 
     this.logger.info('Payment history entry created', {
@@ -35,14 +30,7 @@ export default class PaymentHistoryRepository extends BaseRepository {
    * @returns {Promise<PaymentHistory[]>} Array of history entries
    */
   async findByPaymentId(paymentId) {
-    this.logger.debug('Finding payment history', { paymentId });
-
     const history = await PaymentHistory.query(this.trx).where('payment_id', paymentId);
-
-    this.logger.debug('Payment history found', {
-      paymentId,
-      count: history.length,
-    });
 
     return history;
   }

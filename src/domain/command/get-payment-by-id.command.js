@@ -26,8 +26,6 @@ export default class GetPaymentByIdCommand extends BaseCommand {
     try {
       const validatedData = this.validate(getPaymentByIdSchema, { id });
 
-      this.logger.debug('Executing command', { paymentId: validatedData.id });
-
       return await this.getPaymentByIdService.execute(validatedData.id);
     } catch (error) {
       return this.handleError(error, { paymentId: id });

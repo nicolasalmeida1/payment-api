@@ -1,10 +1,16 @@
 #!/usr/bin/env node
 
 import { runWorker } from './worker.js';
+import Logger from '../infrastructure/logger/logger.js';
 
-console.log('🚀 Starting Temporal Worker for payment processing...');
+const logger = new Logger('StartWorker');
+
+logger.info('Starting Temporal Worker for payment processing...');
 
 runWorker().catch(error => {
-  console.error('❌ Worker failed to start:', error);
+  logger.error('Worker failed to start', {
+    error: error.message,
+    stack: error.stack,
+  });
   process.exit(1);
 });

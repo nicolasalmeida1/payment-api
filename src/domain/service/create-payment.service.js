@@ -64,10 +64,6 @@ export default class CreatePaymentService {
    * @throws {Error} If preference creation fails
    */
   async processCreditCardPayment(payment) {
-    this.logger.info('Processing credit card payment with Mercado Pago', {
-      paymentId: payment.id,
-    });
-
     try {
       const mercadoPagoPreference = await this.mercadoPagoService.createPreference(payment);
 
@@ -96,13 +92,6 @@ export default class CreatePaymentService {
   async execute(validatedData) {
     const paymentId = randomUUID();
 
-    this.logger.info('Creating payment', {
-      paymentId,
-      cpf: validatedData.cpf,
-      amount: validatedData.amount,
-      paymentMethod: validatedData.paymentMethod,
-    });
-
     try {
       await this.paymentRepository.startTransaction();
       this.paymentHistoryRepository.setTransaction(this.paymentRepository.trx);
@@ -126,10 +115,6 @@ export default class CreatePaymentService {
 
       if (validatedData.paymentMethod === PaymentMethod.CREDIT_CARD) {
         if (this.useTemporalWorkflow) {
-          this.logger.info('Starting Temporal workflow for credit card payment', {
-            paymentId: payment.id,
-          });
-
           try {
             workflowData = await startCreditCardPaymentWorkflow({
               id: payment.id,

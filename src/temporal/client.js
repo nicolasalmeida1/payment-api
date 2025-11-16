@@ -54,12 +54,6 @@ export async function startCreditCardPaymentWorkflow(paymentData) {
       workflowIdReusePolicy: 'WORKFLOW_ID_REUSE_POLICY_REJECT_DUPLICATE',
     });
 
-    logger.info('Credit card payment workflow started', {
-      workflowId,
-      paymentId: paymentData.id,
-      runId: handle.firstExecutionRunId,
-    });
-
     return {
       workflowId,
       runId: handle.firstExecutionRunId,
@@ -88,11 +82,6 @@ export async function getCreditCardPaymentWorkflowResult(workflowId) {
 
     const result = await handle.result();
 
-    logger.info('Credit card payment workflow result retrieved', {
-      workflowId,
-      result,
-    });
-
     return result;
   } catch (error) {
     logger.error('Failed to get workflow result', {
@@ -117,11 +106,6 @@ export async function getCreditCardPaymentWorkflowStatus(workflowId) {
     const handle = client.workflow.getHandle(workflowId);
 
     const description = await handle.describe();
-
-    logger.info('Credit card payment workflow status retrieved', {
-      workflowId,
-      status: description.status,
-    });
 
     return {
       workflowId,
@@ -148,6 +132,5 @@ export async function closeTemporalClient() {
   if (clientInstance) {
     await clientInstance.connection.close();
     clientInstance = null;
-    logger.info('Temporal client connection closed');
   }
 }

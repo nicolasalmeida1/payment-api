@@ -23,8 +23,6 @@ export default class GetPaymentByIdService {
    * @throws {PaymentNotFoundError} If payment doesn't exist
    */
   async execute(id) {
-    this.logger.debug('Fetching payment', { paymentId: id });
-
     try {
       const payment = await this.paymentRepository.findById(id);
 
@@ -32,8 +30,6 @@ export default class GetPaymentByIdService {
         this.logger.warn('Payment not found', { paymentId: id });
         throw new PaymentNotFoundError(id);
       }
-
-      this.logger.info('Payment fetched successfully', { paymentId: id });
 
       return {
         success: true,

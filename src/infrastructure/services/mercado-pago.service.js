@@ -26,10 +26,6 @@ export default class MercadoPagoService {
    * @throws {Error} If API request fails
    */
   async createPreference(payment) {
-    this.logger.debug('Creating Mercado Pago preference', {
-      paymentId: payment.id,
-    });
-
     const preferenceData = this.buildPreferenceData(payment);
 
     try {
@@ -76,8 +72,6 @@ export default class MercadoPagoService {
    * @returns {MercadoPagoPreferenceData} Preference data
    */
   buildPreferenceData(payment) {
-    this.logger.debug('Building preference data', { paymentId: payment.id });
-
     const preferenceData = {
       items: [
         {
@@ -130,8 +124,6 @@ export default class MercadoPagoService {
    * @throws {Error} If API request fails
    */
   async getPreference(preferenceId) {
-    this.logger.debug('Getting Mercado Pago preference', { preferenceId });
-
     try {
       const response = await fetch(`${this.baseUrl}${MercadoPagoRoutes.GET_PREFERENCE}/${preferenceId}`, {
         method: 'GET',
@@ -153,7 +145,6 @@ export default class MercadoPagoService {
       }
 
       const data = await response.json();
-      this.logger.debug('Preference retrieved successfully', { preferenceId });
 
       return data;
     } catch (error) {
@@ -174,8 +165,6 @@ export default class MercadoPagoService {
    * @throws {Error} If API request fails
    */
   async getPayment(paymentId) {
-    this.logger.debug('Getting Mercado Pago payment', { paymentId });
-
     try {
       const response = await fetch(`${this.baseUrl}${MercadoPagoRoutes.GET_PAYMENT}/${paymentId}`, {
         method: 'GET',
@@ -197,7 +186,6 @@ export default class MercadoPagoService {
       }
 
       const data = await response.json();
-      this.logger.debug('Payment retrieved successfully', { paymentId });
 
       return data;
     } catch (error) {

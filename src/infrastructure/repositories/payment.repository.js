@@ -13,8 +13,6 @@ export default class PaymentRepository extends BaseRepository {
    * @returns {Promise<Payment>} Created payment record
    */
   async create(paymentData) {
-    this.logger.debug('Creating payment', { paymentId: paymentData.id });
-
     const createdPayment = await Payment.query(this.trx).insert(paymentData);
     this.logger.info('Payment created', { paymentId: createdPayment.id });
 
@@ -27,14 +25,7 @@ export default class PaymentRepository extends BaseRepository {
    * @returns {Promise<Payment|null>} Payment record or null if not found
    */
   async findById(id) {
-    this.logger.debug('Finding payment by id', { paymentId: id });
     const payment = await Payment.query().findById(id);
-
-    if (payment) {
-      this.logger.debug('Payment found', { paymentId: id });
-    } else {
-      this.logger.debug('Payment not found', { paymentId: id });
-    }
 
     return payment;
   }
@@ -46,8 +37,6 @@ export default class PaymentRepository extends BaseRepository {
    * @returns {Promise<Payment|null>} Updated payment or null if not found
    */
   async update(id, paymentData) {
-    this.logger.debug('Updating payment', { paymentId: id, ...paymentData });
-
     const updatedPayment = await Payment.query(this.trx).findById(id).patch(paymentData);
 
     if (updatedPayment === 0) {
@@ -89,8 +78,6 @@ export default class PaymentRepository extends BaseRepository {
    * @returns {Promise<Payment[]>} Array of payment records
    */
   async findAll(filters = {}) {
-    this.logger.debug('Finding payments', { filters });
-
     const { page = 1, take = 10, ...otherFilters } = filters;
 
     let query = Payment.query();
@@ -100,8 +87,6 @@ export default class PaymentRepository extends BaseRepository {
     const offset = (page - 1) * take;
 
     const payments = await query.limit(limit).offset(offset);
-
-    this.logger.debug('Payments found', { count: payments.length, page, take });
 
     return payments;
   }

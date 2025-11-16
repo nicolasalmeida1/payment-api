@@ -17,8 +17,6 @@ const useMock = !process.env.MERCADO_PAGO_ACCESS_TOKEN || process.env.USE_MERCAD
  * @throws {Error} If payment creation fails
  */
 export async function createPaymentRecord(paymentData) {
-  logger.info('Creating payment record in database', { paymentId: paymentData.id });
-
   const paymentRepository = new PaymentRepository(db);
   const paymentHistoryRepository = new PaymentHistoryRepository(db);
 
@@ -101,11 +99,6 @@ export async function checkPaymentStatus(mercadoPagoPaymentId) {
   try {
     const payment = await mercadoPagoService.getPayment(mercadoPagoPaymentId);
 
-    logger.info('Payment status retrieved', {
-      mercadoPagoPaymentId,
-      status: payment.status,
-    });
-
     return {
       status: payment.status,
       external_reference: payment.external_reference,
@@ -130,8 +123,6 @@ export async function checkPaymentStatus(mercadoPagoPaymentId) {
  * @throws {Error} If payment not found or update fails
  */
 export async function updatePaymentStatus(paymentId, newStatus, mercadoPagoData) {
-  logger.info('Updating payment status', { paymentId, newStatus });
-
   const paymentRepository = new PaymentRepository(db);
   const paymentHistoryRepository = new PaymentHistoryRepository(db);
 

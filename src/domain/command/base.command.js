@@ -22,8 +22,6 @@ export default class BaseCommand {
    * @throws {ValidationError} If validation fails
    */
   validate(schema, input, context = {}) {
-    this.logger.debug('Validating input', { ...context, input });
-
     const { error, value } = schema.validate(input, {
       abortEarly: false,
       allowUnknown: true,

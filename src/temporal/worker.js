@@ -26,10 +26,6 @@ export async function createWorker() {
       maxConcurrentWorkflowTaskExecutions: 10,
     });
 
-    logger.info('Temporal worker created successfully', {
-      taskQueue: 'payment-queue',
-    });
-
     return worker;
   } catch (error) {
     logger.error('Failed to create Temporal worker', {
@@ -48,11 +44,7 @@ export async function createWorker() {
 export async function runWorker() {
   const worker = await createWorker();
 
-  logger.info('Starting Temporal worker...');
-
   await worker.run();
-
-  logger.info('Temporal worker stopped');
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

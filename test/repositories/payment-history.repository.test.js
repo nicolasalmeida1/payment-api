@@ -144,19 +144,16 @@ describe('PaymentHistoryRepository', () => {
       expect(result).toHaveLength(0);
     });
 
-    it('should log history retrieval', async () => {
+    it('should return history entries', async () => {
       const paymentId = 'payment-123';
       const mockHistory = [{ id: 1, payment_id: paymentId }];
 
       mockQuery.where.mockResolvedValue(mockHistory);
-      const loggerSpy = jest.spyOn(repository.logger, 'debug');
 
-      await repository.findByPaymentId(paymentId);
+      const result = await repository.findByPaymentId(paymentId);
 
-      expect(loggerSpy).toHaveBeenCalledWith('Payment history found', {
-        paymentId,
-        count: 1,
-      });
+      expect(result).toEqual(mockHistory);
+      expect(result).toHaveLength(1);
     });
   });
 });

@@ -51,12 +51,6 @@ export default class UpdatePaymentService {
    * @returns {Promise<void>}
    */
   async createStatusHistoryEntry(id, oldStatus, newStatus) {
-    this.logger.debug('Status changed, creating history entry', {
-      paymentId: id,
-      oldStatus,
-      newStatus,
-    });
-
     await this.paymentHistoryRepository.create({
       payment_id: id,
       event: PaymentEvent.PAYMENT_STATUS_CHANGED,
@@ -76,8 +70,6 @@ export default class UpdatePaymentService {
    * @throws {PaymentAlreadyPaidError} If payment is already paid
    */
   async execute(id, validatedData) {
-    this.logger.info('Updating payment', { paymentId: id, ...validatedData });
-
     try {
       const existingPayment = await this.paymentRepository.findById(id);
 

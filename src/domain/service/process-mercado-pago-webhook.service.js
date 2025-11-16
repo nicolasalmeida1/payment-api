@@ -62,10 +62,6 @@ export default class ProcessMercadoPagoWebhookService {
    * @returns {Promise<{mercadoPagoPayment: MercadoPagoPayment, paymentId: string}|null>} Payment data or null
    */
   async fetchMercadoPagoPaymentData(mercadoPagoPaymentId) {
-    this.logger.debug('Fetching payment details from Mercado Pago', {
-      mercadoPagoPaymentId,
-    });
-
     const mercadoPagoPayment = await this.mercadoPagoService.getPayment(mercadoPagoPaymentId);
 
     const paymentId = mercadoPagoPayment.external_reference;
@@ -128,19 +124,7 @@ export default class ProcessMercadoPagoWebhookService {
 
       const newStatus = this.mapMercadoPagoStatusToPaymentStatus(mercadoPagoPayment.status);
 
-      this.logger.info('Mapped Mercado Pago status', {
-        paymentId,
-        mercadoPagoStatus: mercadoPagoPayment.status,
-        newStatus,
-        currentStatus: payment.status,
-      });
-
       if (payment.status === newStatus) {
-        this.logger.info('Payment status unchanged, skipping update', {
-          paymentId,
-          status: payment.status,
-        });
-
         await transaction.commit();
 
         return {
@@ -181,17 +165,7 @@ export default class ProcessMercadoPagoWebhookService {
    * @returns {Promise<ServiceResponse>} Processing result
    */
   async execute(webhookData) {
-    this.logger.debug('Processing Mercado Pago webhook', {
-      action: webhookData.action,
-      type: webhookData.type,
-      dataId: webhookData.data?.id,
-    });
-
     if (this.shouldIgnoreWebhook(webhookData)) {
-      this.logger.info('Ignoring non-payment webhook', {
-        type: webhookData.type,
-      });
-
       return {
         success: true,
         message: 'Webhook ignored - not a payment notification',

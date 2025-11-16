@@ -21,15 +21,8 @@ export default class ListPaymentsService {
    * @returns {Promise<ListPaymentsResponse>} List of payments with count
    */
   async execute(filters) {
-    this.logger.debug('Listing payments', { filters });
-
     try {
       const payments = await this.paymentRepository.findAll(filters);
-
-      this.logger.info('Payments listed successfully', {
-        count: payments.length,
-        filters,
-      });
 
       return {
         success: true,

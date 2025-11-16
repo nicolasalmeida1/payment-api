@@ -60,8 +60,8 @@ export async function creditCardPaymentWorkflow(paymentInput) {
         await activities.updatePaymentStatus(payment.id, mappedStatus, mercadoPagoPayment);
         paymentStatus = mappedStatus;
       }
-    } catch (error) {
-      console.error(`[Workflow] Attempt ${attempts + 1} failed to check payment status:`, error.message);
+    } catch {
+      // Silently retry on errors
     }
 
     attempts++;

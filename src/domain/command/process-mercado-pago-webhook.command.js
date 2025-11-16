@@ -24,11 +24,6 @@ export default class ProcessMercadoPagoWebhookCommand extends BaseCommand {
    * @returns {Promise<CommandResult>} Command execution result
    */
   async execute(webhookData) {
-    this.logger.info('Executing ProcessMercadoPagoWebhookCommand', {
-      action: webhookData.action,
-      type: webhookData.type,
-    });
-
     const validatedData = this.validate(mercadoPagoWebhookSchema, webhookData, this.context);
 
     try {
