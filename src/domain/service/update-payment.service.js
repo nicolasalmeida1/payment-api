@@ -1,14 +1,20 @@
+import Logger from '../../infrastructure/logger/logger.js';
+
 export default class UpdatePaymentService {
   constructor({ paymentRepository, paymentHistoryRepository }) {
     this.paymentRepository = paymentRepository;
     this.paymentHistoryRepository = paymentHistoryRepository;
+    this.logger = new Logger('UpdatePaymentService');
   }
 
   async execute(id, validatedData) {
+    this.logger.info('Updating payment', { paymentId: id, ...validatedData });
+
     try {
       const existingPayment = await this.paymentRepository.findById(id);
 
       if (!existingPayment) {
+        this.logger.warn('Payment not found', { paymentId: id });
         throw new Error('Payment not found');
       }
 
@@ -27,6 +33,12 @@ export default class UpdatePaymentService {
         validatedData.status &&
         validatedData.status !== existingPayment.status
       ) {
+        this.logger.debug('Status changed, creating history entry', {
+          paymentId: id,
+          oldStatus: existingPayment.status,
+          newStatus: validatedData.status,
+        });
+
         await this.paymentHistoryRepository.create({
           payment_id: id,
           event: 'PAYMENT_STATUS_CHANGED',
@@ -37,12 +49,18 @@ export default class UpdatePaymentService {
         });
       }
 
+      this.logger.info('Payment updated successfully', { paymentId: id });
+
       return {
         success: true,
         data: updatedPayment,
       };
     } catch (error) {
-      console.error('Error updating payment:', error);
+      this.logger.error('Error updating payment', {
+        error: error.message,
+        stack: error.stack,
+        paymentId: id,
+      });
       throw error;
     }
   }

@@ -1,10 +1,19 @@
+import Logger from '../../infrastructure/logger/logger.js';
+
 export default class CreatePaymentService {
   constructor({ paymentRepository, paymentHistoryRepository }) {
     this.paymentRepository = paymentRepository;
     this.paymentHistoryRepository = paymentHistoryRepository;
+    this.logger = new Logger('CreatePaymentService');
   }
 
   async execute(validatedData) {
+    this.logger.info('Creating payment', {
+      paymentId: validatedData.id,
+      cpf: validatedData.cpf,
+      amount: validatedData.amount,
+    });
+
     try {
       const paymentData = {
         id: validatedData.id,
@@ -33,12 +42,20 @@ export default class CreatePaymentService {
         this.paymentHistoryRepository,
       );
 
+      this.logger.info('Payment created successfully', {
+        paymentId: payment.id,
+      });
+
       return {
         success: true,
         data: payment,
       };
     } catch (error) {
-      console.error('Error creating payment:', error);
+      this.logger.error('Error creating payment', {
+        error: error.message,
+        stack: error.stack,
+        paymentId: validatedData.id,
+      });
       throw error;
     }
   }
