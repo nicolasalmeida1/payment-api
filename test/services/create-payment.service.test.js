@@ -5,6 +5,7 @@ describe('CreatePaymentService', () => {
   let service;
   let mockPaymentRepository;
   let mockPaymentHistoryRepository;
+  let mockMercadoPagoService;
 
   beforeEach(() => {
     mockPaymentRepository = {
@@ -20,9 +21,15 @@ describe('CreatePaymentService', () => {
       setTransaction: jest.fn(),
     };
 
+    mockMercadoPagoService = {
+      buildPreferenceData: jest.fn(),
+      createPreference: jest.fn(),
+    };
+
     service = new CreatePaymentService({
       paymentRepository: mockPaymentRepository,
       paymentHistoryRepository: mockPaymentHistoryRepository,
+      mercadoPagoService: mockMercadoPagoService,
     });
 
     service.logger = {
@@ -114,6 +121,125 @@ describe('CreatePaymentService', () => {
       expect(createHistoryCall.event).toBe('PAYMENT_CREATED');
 
       expect(mockPaymentRepository.commitTransaction).toHaveBeenCalled();
+    });
+
+    it('should create CREDIT_CARD payment and integrate with Mercado Pago', async () => {
+      const validatedData = {
+        cpf: '12345678901',
+        description: 'Credit card payment test',
+        amount: 200.0,
+        paymentMethod: 'CREDIT_CARD',
+      };
+
+      const mockPreferenceData = {
+        items: [
+          {
+            id: expect.any(String),
+            title: validatedData.description,
+            quantity: 1,
+            currency_id: 'BRL',
+            unit_price: validatedData.amount,
+          },
+        ],
+      };
+
+      const mockMercadoPagoResponse = {
+        id: 'preference-123',
+        init_point: 'https://mercadopago.com/checkout/preference-123',
+        sandbox_init_point:
+          'https://sandbox.mercadopago.com/checkout/preference-123',
+      };
+
+      mockPaymentRepository.startTransaction.mockResolvedValue({});
+      mockPaymentRepository.create.mockImplementation((data) => ({
+        ...data,
+        id: data.id,
+      }));
+      mockPaymentHistoryRepository.create.mockResolvedValue({});
+      mockPaymentRepository.commitTransaction.mockResolvedValue();
+      mockMercadoPagoService.buildPreferenceData.mockReturnValue(
+        mockPreferenceData,
+      );
+      mockMercadoPagoService.createPreference.mockResolvedValue(
+        mockMercadoPagoResponse,
+      );
+
+      const result = await service.execute(validatedData);
+
+      expect(result.success).toBe(true);
+      expect(result.data.payment_method).toBe('CREDIT_CARD');
+      expect(result.data.status).toBe('PENDING');
+      expect(result.mercadoPago).toBeDefined();
+      expect(result.mercadoPago.preference_id).toBe('preference-123');
+      expect(result.mercadoPago.init_point).toBe(
+        'https://mercadopago.com/checkout/preference-123',
+      );
+
+      expect(mockMercadoPagoService.buildPreferenceData).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cpf: validatedData.cpf,
+          description: validatedData.description,
+          amount: validatedData.amount,
+          payment_method: 'CREDIT_CARD',
+        }),
+      );
+      expect(mockMercadoPagoService.createPreference).toHaveBeenCalledWith(
+        mockPreferenceData,
+      );
+    });
+
+    it('should not call Mercado Pago for PIX payments', async () => {
+      const validatedData = {
+        cpf: '12345678901',
+        description: 'PIX payment test',
+        amount: 100.5,
+        paymentMethod: 'PIX',
+      };
+
+      mockPaymentRepository.startTransaction.mockResolvedValue({});
+      mockPaymentRepository.create.mockImplementation((data) => ({
+        ...data,
+        id: data.id,
+      }));
+      mockPaymentHistoryRepository.create.mockResolvedValue({});
+      mockPaymentRepository.commitTransaction.mockResolvedValue();
+
+      const result = await service.execute(validatedData);
+
+      expect(result.success).toBe(true);
+      expect(result.mercadoPago).toBeNull();
+      expect(mockMercadoPagoService.buildPreferenceData).not.toHaveBeenCalled();
+      expect(mockMercadoPagoService.createPreference).not.toHaveBeenCalled();
+    });
+
+    it('should rollback payment if Mercado Pago integration fails', async () => {
+      const validatedData = {
+        cpf: '12345678901',
+        description: 'Credit card payment test',
+        amount: 200.0,
+        paymentMethod: 'CREDIT_CARD',
+      };
+
+      const mercadoPagoError = new Error('Mercado Pago API error');
+
+      mockPaymentRepository.startTransaction.mockResolvedValue({});
+      mockPaymentRepository.create.mockImplementation((data) => ({
+        ...data,
+        id: data.id,
+      }));
+      mockPaymentHistoryRepository.create.mockResolvedValue({});
+      mockPaymentRepository.commitTransaction.mockResolvedValue();
+      mockMercadoPagoService.buildPreferenceData.mockReturnValue({});
+      mockMercadoPagoService.createPreference.mockRejectedValue(
+        mercadoPagoError,
+      );
+      mockPaymentRepository.rollbackTransaction.mockResolvedValue();
+
+      await expect(service.execute(validatedData)).rejects.toThrow(
+        'Mercado Pago API error',
+      );
+
+      expect(mockPaymentRepository.rollbackTransaction).toHaveBeenCalled();
     });
 
     it('should handle repository errors', async () => {

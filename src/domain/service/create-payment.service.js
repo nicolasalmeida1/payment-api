@@ -1,11 +1,16 @@
 import { randomUUID } from 'crypto';
 import Logger from '../../infrastructure/logger/logger.js';
-import { PaymentStatus, PaymentEvent } from '../enums/index.js';
+import { PaymentStatus, PaymentEvent, PaymentMethod } from '../enums/index.js';
 
 export default class CreatePaymentService {
-  constructor({ paymentRepository, paymentHistoryRepository }) {
+  constructor({
+    paymentRepository,
+    paymentHistoryRepository,
+    mercadoPagoService,
+  }) {
     this.paymentRepository = paymentRepository;
     this.paymentHistoryRepository = paymentHistoryRepository;
+    this.mercadoPagoService = mercadoPagoService;
     this.logger = new Logger(this.constructor.name);
   }
 
@@ -32,6 +37,39 @@ export default class CreatePaymentService {
         status: PaymentStatus.PENDING,
       },
     };
+  }
+
+  async processCreditCardPayment(payment) {
+    this.logger.info('Processing credit card payment with Mercado Pago', {
+      paymentId: payment.id,
+    });
+
+    try {
+      const preferenceData =
+        this.mercadoPagoService.buildPreferenceData(payment);
+      const mercadoPagoPreference =
+        await this.mercadoPagoService.createPreference(preferenceData);
+
+      this.logger.info('Mercado Pago preference created', {
+        paymentId: payment.id,
+        preferenceId: mercadoPagoPreference.id,
+        initPoint: mercadoPagoPreference.init_point,
+      });
+
+      return {
+        preference_id: mercadoPagoPreference.id,
+        init_point: mercadoPagoPreference.init_point,
+        sandbox_init_point: mercadoPagoPreference.sandbox_init_point,
+      };
+    } catch (error) {
+      this.logger.error('Error creating Mercado Pago preference', {
+        error: error.message,
+        stack: error.stack,
+        paymentId: payment.id,
+      });
+
+      throw error;
+    }
   }
 
   async execute(validatedData) {
@@ -62,9 +100,16 @@ export default class CreatePaymentService {
         status: payment.status,
       });
 
+      let mercadoPagoData = null;
+
+      if (validatedData.paymentMethod === PaymentMethod.CREDIT_CARD) {
+        mercadoPagoData = await this.processCreditCardPayment(payment);
+      }
+
       return {
         success: true,
         data: payment,
+        mercadoPago: mercadoPagoData,
       };
     } catch (error) {
       await this.paymentRepository.rollbackTransaction();
@@ -73,6 +118,7 @@ export default class CreatePaymentService {
         stack: error.stack,
         paymentId,
       });
+
       throw error;
     }
   }
