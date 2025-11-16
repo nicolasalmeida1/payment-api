@@ -1,7 +1,7 @@
 import knex from 'knex';
 import { Model } from 'objection';
 import { env } from '../config/env.js';
-console.warn(env);
+
 const connection = knex({
   client: 'pg',
   connection: {
