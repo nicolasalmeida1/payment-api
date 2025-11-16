@@ -8,11 +8,16 @@ describe('CreatePaymentService', () => {
 
   beforeEach(() => {
     mockPaymentRepository = {
-      createWithHistory: jest.fn(),
+      create: jest.fn(),
+      startTransaction: jest.fn(),
+      commitTransaction: jest.fn(),
+      rollbackTransaction: jest.fn(),
+      trx: {},
     };
 
     mockPaymentHistoryRepository = {
       create: jest.fn(),
+      setTransaction: jest.fn(),
     };
 
     service = new CreatePaymentService({
@@ -45,9 +50,10 @@ describe('CreatePaymentService', () => {
         status: 'PENDING',
       };
 
-      mockPaymentRepository.createWithHistory.mockResolvedValue(
-        expectedPayment,
-      );
+      mockPaymentRepository.startTransaction.mockResolvedValue({});
+      mockPaymentRepository.create.mockResolvedValue(expectedPayment);
+      mockPaymentHistoryRepository.create.mockResolvedValue({});
+      mockPaymentRepository.commitTransaction.mockResolvedValue();
 
       const result = await service.execute(validatedData);
 
@@ -55,6 +61,34 @@ describe('CreatePaymentService', () => {
         success: true,
         data: expectedPayment,
       });
+
+      expect(mockPaymentRepository.startTransaction).toHaveBeenCalled();
+      expect(mockPaymentHistoryRepository.setTransaction).toHaveBeenCalledWith(
+        mockPaymentRepository.trx,
+      );
+
+      expect(mockPaymentRepository.create).toHaveBeenCalledWith({
+        id: validatedData.id,
+        cpf: validatedData.cpf,
+        description: validatedData.description,
+        amount: validatedData.amount,
+        payment_method: 'PIX',
+        status: 'PENDING',
+      });
+
+      expect(mockPaymentHistoryRepository.create).toHaveBeenCalledWith({
+        payment_id: validatedData.id,
+        event: 'PAYMENT_CREATED',
+        event_data: {
+          cpf: validatedData.cpf,
+          description: validatedData.description,
+          amount: validatedData.amount,
+          payment_method: 'PIX',
+          status: 'PENDING',
+        },
+      });
+
+      expect(mockPaymentRepository.commitTransaction).toHaveBeenCalled();
 
       expect(service.logger.info).toHaveBeenCalledWith('Creating payment', {
         paymentId: validatedData.id,
@@ -68,29 +102,6 @@ describe('CreatePaymentService', () => {
           paymentId: expectedPayment.id,
         },
       );
-
-      expect(mockPaymentRepository.createWithHistory).toHaveBeenCalledWith(
-        {
-          id: validatedData.id,
-          cpf: validatedData.cpf,
-          description: validatedData.description,
-          amount: validatedData.amount,
-          payment_method: 'PIX',
-          status: 'PENDING',
-        },
-        {
-          payment_id: validatedData.id,
-          event: 'PAYMENT_CREATED',
-          event_data: {
-            cpf: validatedData.cpf,
-            description: validatedData.description,
-            amount: validatedData.amount,
-            payment_method: 'PIX',
-            status: 'PENDING',
-          },
-        },
-        mockPaymentHistoryRepository,
-      );
     });
 
     it('should handle repository errors', async () => {
@@ -103,12 +114,15 @@ describe('CreatePaymentService', () => {
       };
 
       const error = new Error('Database error');
-      mockPaymentRepository.createWithHistory.mockRejectedValue(error);
+      mockPaymentRepository.startTransaction.mockResolvedValue({});
+      mockPaymentRepository.create.mockRejectedValue(error);
+      mockPaymentRepository.rollbackTransaction.mockResolvedValue();
 
       await expect(service.execute(validatedData)).rejects.toThrow(
         'Database error',
       );
 
+      expect(mockPaymentRepository.rollbackTransaction).toHaveBeenCalled();
       expect(service.logger.error).toHaveBeenCalledWith(
         'Error creating payment',
         {

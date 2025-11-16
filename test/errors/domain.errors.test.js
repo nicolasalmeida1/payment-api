@@ -44,7 +44,7 @@ describe('Domain Errors', () => {
       expect(error.message).toBe(
         'Validation failed: Field is required, Invalid email',
       );
-      expect(error.statusCode).toBe(400);
+      expect(error.statusCode).toBe(422);
       expect(error.errors).toEqual(errors);
       expect(error.name).toBe('ValidationError');
     });

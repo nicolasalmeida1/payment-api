@@ -1,19 +1,14 @@
 import PaymentHistory from '../../db/models/payment-history.js';
-import Logger from '../logger/logger.js';
+import BaseRepository from './base.repository.js';
 
-export default class PaymentHistoryRepository {
-  constructor(db) {
-    this.db = db;
-    this.logger = new Logger(this.constructor.name);
-  }
-
-  async create(historyData, trx) {
+export default class PaymentHistoryRepository extends BaseRepository {
+  async create(historyData) {
     this.logger.debug('Creating payment history entry', {
       paymentId: historyData.payment_id,
       event: historyData.event,
     });
 
-    const history = await PaymentHistory.query(trx).insert(historyData);
+    const history = await PaymentHistory.query(this.trx).insert(historyData);
 
     this.logger.info('Payment history entry created', {
       historyId: history.id,
@@ -24,10 +19,10 @@ export default class PaymentHistoryRepository {
     return history;
   }
 
-  async findByPaymentId(paymentId, trx) {
+  async findByPaymentId(paymentId) {
     this.logger.debug('Finding payment history', { paymentId });
 
-    const history = await PaymentHistory.query(trx).where(
+    const history = await PaymentHistory.query(this.trx).where(
       'payment_id',
       paymentId,
     );

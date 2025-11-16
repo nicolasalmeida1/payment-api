@@ -16,7 +16,7 @@ export class PaymentNotFoundError extends DomainError {
 
 export class ValidationError extends DomainError {
   constructor(errors) {
-    super(`Validation failed: ${errors.join(', ')}`, 400);
+    super(`Validation failed: ${errors.join(', ')}`, 422);
     this.errors = errors;
   }
 }

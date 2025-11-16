@@ -41,14 +41,16 @@ export default class CreatePaymentService {
     });
 
     try {
+      await this.paymentRepository.startTransaction();
+      this.paymentHistoryRepository.setTransaction(this.paymentRepository.trx);
+
       const paymentData = this.getPaymentData(validatedData);
       const historyData = this.getHistoryData(validatedData);
 
-      const payment = await this.paymentRepository.createWithHistory(
-        paymentData,
-        historyData,
-        this.paymentHistoryRepository,
-      );
+      const payment = await this.paymentRepository.create(paymentData);
+      await this.paymentHistoryRepository.create(historyData);
+
+      await this.paymentRepository.commitTransaction();
 
       this.logger.info('Payment created successfully', {
         paymentId: payment.id,
@@ -59,6 +61,7 @@ export default class CreatePaymentService {
         data: payment,
       };
     } catch (error) {
+      await this.paymentRepository.rollbackTransaction();
       this.logger.error('Error creating payment', {
         error: error.message,
         stack: error.stack,

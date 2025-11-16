@@ -53,6 +53,9 @@ export default class UpdatePaymentService {
         throw new PaymentNotFoundError(id);
       }
 
+      await this.paymentRepository.startTransaction();
+      this.paymentHistoryRepository.setTransaction(this.paymentRepository.trx);
+
       const updateData = this.buildUpdateData(validatedData);
       const updatedPayment = await this.paymentRepository.update(
         id,
@@ -67,6 +70,8 @@ export default class UpdatePaymentService {
         );
       }
 
+      await this.paymentRepository.commitTransaction();
+
       this.logger.info('Payment updated successfully', { paymentId: id });
 
       return {
@@ -74,6 +79,7 @@ export default class UpdatePaymentService {
         data: updatedPayment,
       };
     } catch (error) {
+      await this.paymentRepository.rollbackTransaction();
       this.logger.error('Error updating payment', {
         error: error.message,
         stack: error.stack,

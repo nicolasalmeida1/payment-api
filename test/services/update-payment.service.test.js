@@ -10,10 +10,15 @@ describe('UpdatePaymentService', () => {
     mockPaymentRepository = {
       findById: jest.fn(),
       update: jest.fn(),
+      startTransaction: jest.fn(),
+      commitTransaction: jest.fn(),
+      rollbackTransaction: jest.fn(),
+      trx: {},
     };
 
     mockPaymentHistoryRepository = {
       create: jest.fn(),
+      setTransaction: jest.fn(),
     };
 
     service = new UpdatePaymentService({
@@ -51,7 +56,10 @@ describe('UpdatePaymentService', () => {
       };
 
       mockPaymentRepository.findById.mockResolvedValue(existingPayment);
+      mockPaymentRepository.startTransaction.mockResolvedValue({});
       mockPaymentRepository.update.mockResolvedValue(updatedPayment);
+      mockPaymentHistoryRepository.create.mockResolvedValue({});
+      mockPaymentRepository.commitTransaction.mockResolvedValue();
 
       const result = await service.execute(id, validatedData);
 
@@ -59,6 +67,11 @@ describe('UpdatePaymentService', () => {
         success: true,
         data: updatedPayment,
       });
+
+      expect(mockPaymentRepository.startTransaction).toHaveBeenCalled();
+      expect(mockPaymentHistoryRepository.setTransaction).toHaveBeenCalledWith(
+        mockPaymentRepository.trx,
+      );
 
       expect(mockPaymentRepository.update).toHaveBeenCalledWith(id, {
         status: 'PAID',
@@ -72,6 +85,8 @@ describe('UpdatePaymentService', () => {
           new_status: 'PAID',
         },
       });
+
+      expect(mockPaymentRepository.commitTransaction).toHaveBeenCalled();
     });
 
     it('should update description without creating history', async () => {
@@ -95,7 +110,9 @@ describe('UpdatePaymentService', () => {
       };
 
       mockPaymentRepository.findById.mockResolvedValue(existingPayment);
+      mockPaymentRepository.startTransaction.mockResolvedValue({});
       mockPaymentRepository.update.mockResolvedValue(updatedPayment);
+      mockPaymentRepository.commitTransaction.mockResolvedValue();
 
       const result = await service.execute(id, validatedData);
 
@@ -105,6 +122,7 @@ describe('UpdatePaymentService', () => {
       });
 
       expect(mockPaymentHistoryRepository.create).not.toHaveBeenCalled();
+      expect(mockPaymentRepository.commitTransaction).toHaveBeenCalled();
     });
 
     it('should throw error when payment not found', async () => {
@@ -138,11 +156,14 @@ describe('UpdatePaymentService', () => {
       };
 
       mockPaymentRepository.findById.mockResolvedValue(existingPayment);
+      mockPaymentRepository.startTransaction.mockResolvedValue({});
       mockPaymentRepository.update.mockResolvedValue(existingPayment);
+      mockPaymentRepository.commitTransaction.mockResolvedValue();
 
       await service.execute(id, validatedData);
 
       expect(mockPaymentHistoryRepository.create).not.toHaveBeenCalled();
+      expect(mockPaymentRepository.commitTransaction).toHaveBeenCalled();
     });
 
     it('should handle repository errors', async () => {
@@ -153,10 +174,13 @@ describe('UpdatePaymentService', () => {
 
       const error = new Error('Database error');
       mockPaymentRepository.findById.mockRejectedValue(error);
+      mockPaymentRepository.rollbackTransaction.mockResolvedValue();
 
       await expect(service.execute(id, validatedData)).rejects.toThrow(
         'Database error',
       );
+
+      expect(mockPaymentRepository.rollbackTransaction).toHaveBeenCalled();
     });
   });
 });
