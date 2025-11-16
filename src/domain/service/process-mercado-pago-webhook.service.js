@@ -2,7 +2,15 @@ import Logger from '../../infrastructure/logger/logger.js';
 import { PaymentStatus, PaymentEvent } from '../enums/index.js';
 import { PaymentNotFoundError } from '../errors/domain.errors.js';
 
+/**
+ * Service responsible for processing Mercado Pago webhook notifications
+ * @class ProcessMercadoPagoWebhookService
+ */
 export default class ProcessMercadoPagoWebhookService {
+  /**
+   * Creates an instance of ProcessMercadoPagoWebhookService
+   * @param {ServiceDependencies} dependencies - Service dependencies
+   */
   constructor({ paymentRepository, paymentHistoryRepository, mercadoPagoService }) {
     this.paymentRepository = paymentRepository;
     this.paymentHistoryRepository = paymentHistoryRepository;
@@ -10,6 +18,11 @@ export default class ProcessMercadoPagoWebhookService {
     this.logger = new Logger(this.constructor.name);
   }
 
+  /**
+   * Maps Mercado Pago payment status to internal payment status
+   * @param {MercadoPagoStatusType} mercadoPagoStatus - Mercado Pago status
+   * @returns {PaymentStatusType} Internal payment status
+   */
   mapMercadoPagoStatusToPaymentStatus(mercadoPagoStatus) {
     const statusMap = {
       approved: PaymentStatus.PAID,
@@ -26,14 +39,28 @@ export default class ProcessMercadoPagoWebhookService {
     return statusMap[mercadoPagoStatus] || PaymentStatus.PENDING;
   }
 
+  /**
+   * Gets payment event type for status change
+   * @returns {PaymentEventType} Payment event type
+   */
   getPaymentEventFromStatus() {
     return PaymentEvent.STATUS_CHANGED;
   }
 
+  /**
+   * Checks if webhook should be ignored
+   * @param {MercadoPagoWebhookInput} webhookData - Webhook data
+   * @returns {boolean} True if webhook should be ignored
+   */
   shouldIgnoreWebhook(webhookData) {
     return webhookData.type !== 'payment';
   }
 
+  /**
+   * Fetches payment details from Mercado Pago API
+   * @param {string} mercadoPagoPaymentId - Mercado Pago payment ID
+   * @returns {Promise<{mercadoPagoPayment: MercadoPagoPayment, paymentId: string}|null>} Payment data or null
+   */
   async fetchMercadoPagoPaymentData(mercadoPagoPaymentId) {
     this.logger.debug('Fetching payment details from Mercado Pago', {
       mercadoPagoPaymentId,
@@ -54,6 +81,13 @@ export default class ProcessMercadoPagoWebhookService {
     return { mercadoPagoPayment, paymentId };
   }
 
+  /**
+   * Updates payment status and creates history entry
+   * @param {Payment} payment - Payment record
+   * @param {PaymentStatusType} newStatus - New payment status
+   * @param {*} transaction - Database transaction
+   * @returns {Promise<void>}
+   */
   async updatePaymentStatus(payment, newStatus, transaction) {
     await this.paymentRepository.update(payment.id, { status: newStatus }, transaction);
 
@@ -75,6 +109,13 @@ export default class ProcessMercadoPagoWebhookService {
     });
   }
 
+  /**
+   * Processes payment status change from webhook
+   * @param {string} paymentId - Payment identifier
+   * @param {MercadoPagoPayment} mercadoPagoPayment - Mercado Pago payment data
+   * @returns {Promise<ServiceResponse>} Processing result
+   * @throws {PaymentNotFoundError} If payment doesn't exist
+   */
   async processPaymentStatusChange(paymentId, mercadoPagoPayment) {
     const transaction = await this.paymentRepository.startTransaction();
 
@@ -134,6 +175,11 @@ export default class ProcessMercadoPagoWebhookService {
     }
   }
 
+  /**
+   * Processes Mercado Pago webhook notification
+   * @param {MercadoPagoWebhookInput} webhookData - Webhook payload
+   * @returns {Promise<ServiceResponse>} Processing result
+   */
   async execute(webhookData) {
     this.logger.debug('Processing Mercado Pago webhook', {
       action: webhookData.action,

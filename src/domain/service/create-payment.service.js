@@ -3,7 +3,15 @@ import Logger from '../../infrastructure/logger/logger.js';
 import { PaymentStatus, PaymentEvent, PaymentMethod } from '../enums/index.js';
 import { startCreditCardPaymentWorkflow } from '../../temporal/client.js';
 
+/**
+ * Service responsible for creating new payments
+ * @class CreatePaymentService
+ */
 export default class CreatePaymentService {
+  /**
+   * Creates an instance of CreatePaymentService
+   * @param {ServiceDependencies} dependencies - Service dependencies
+   */
   constructor({ paymentRepository, paymentHistoryRepository, mercadoPagoService }) {
     this.paymentRepository = paymentRepository;
     this.paymentHistoryRepository = paymentHistoryRepository;
@@ -12,6 +20,12 @@ export default class CreatePaymentService {
     this.useTemporalWorkflow = process.env.USE_TEMPORAL_WORKFLOW === 'true';
   }
 
+  /**
+   * Builds payment data object for database insertion
+   * @param {CreatePaymentInput} validatedData - Validated payment input
+   * @param {string} paymentId - Generated payment UUID
+   * @returns {PaymentData} Payment data ready for database insertion
+   */
   getPaymentData(validatedData, paymentId) {
     return {
       id: paymentId,
@@ -23,6 +37,12 @@ export default class CreatePaymentService {
     };
   }
 
+  /**
+   * Builds payment history data for initial creation event
+   * @param {CreatePaymentInput} validatedData - Validated payment input
+   * @param {string} paymentId - Payment UUID
+   * @returns {PaymentHistoryData} Payment history data for creation event
+   */
   getHistoryData(validatedData, paymentId) {
     return {
       payment_id: paymentId,
@@ -37,6 +57,12 @@ export default class CreatePaymentService {
     };
   }
 
+  /**
+   * Processes credit card payment through Mercado Pago
+   * @param {Payment} payment - Payment object
+   * @returns {Promise<MercadoPagoPreferenceResponse>} Mercado Pago preference data
+   * @throws {Error} If preference creation fails
+   */
   async processCreditCardPayment(payment) {
     this.logger.info('Processing credit card payment with Mercado Pago', {
       paymentId: payment.id,
@@ -61,6 +87,12 @@ export default class CreatePaymentService {
     }
   }
 
+  /**
+   * Executes payment creation with transaction support
+   * @param {CreatePaymentInput} validatedData - Validated payment input data
+   * @returns {Promise<CreatePaymentResponse>} Created payment with additional data
+   * @throws {Error} If payment creation fails
+   */
   async execute(validatedData) {
     const paymentId = randomUUID();
 

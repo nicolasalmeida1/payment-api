@@ -1,12 +1,27 @@
 import Logger from '../../infrastructure/logger/logger.js';
 import { PaymentNotFoundError } from '../errors/domain.errors.js';
 
+/**
+ * Service responsible for fetching a single payment by ID
+ * @class GetPaymentByIdService
+ */
 export default class GetPaymentByIdService {
+  /**
+   * Creates an instance of GetPaymentByIdService
+   * @param {Object} dependencies - Service dependencies
+   * @param {*} dependencies.paymentRepository - Payment repository instance
+   */
   constructor({ paymentRepository }) {
     this.paymentRepository = paymentRepository;
     this.logger = new Logger(this.constructor.name);
   }
 
+  /**
+   * Fetches a payment by its ID
+   * @param {string} id - Payment identifier
+   * @returns {Promise<GetPaymentResponse>} Payment data
+   * @throws {PaymentNotFoundError} If payment doesn't exist
+   */
   async execute(id) {
     this.logger.debug('Fetching payment', { paymentId: id });
 
