@@ -1,4 +1,5 @@
 import Logger from '../logger/logger.js';
+import { MercadoPagoRoutes } from '../../domain/enums/mercado-pago-routes.enum.js';
 
 export default class MercadoPagoService {
   constructor() {
@@ -16,14 +17,17 @@ export default class MercadoPagoService {
     this.logger.debug('Creating Mercado Pago preference', { preferenceData });
 
     try {
-      const response = await fetch(`${this.baseUrl}/checkout/preferences`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.accessToken}`,
+      const response = await fetch(
+        `${this.baseUrl}${MercadoPagoRoutes.CREATE_PREFERENCE}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.accessToken}`,
+          },
+          body: JSON.stringify(preferenceData),
         },
-        body: JSON.stringify(preferenceData),
-      });
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -103,7 +107,7 @@ export default class MercadoPagoService {
 
     try {
       const response = await fetch(
-        `${this.baseUrl}/checkout/preferences/${preferenceId}`,
+        `${this.baseUrl}${MercadoPagoRoutes.GET_PREFERENCE}/${preferenceId}`,
         {
           method: 'GET',
           headers: {
@@ -145,13 +149,16 @@ export default class MercadoPagoService {
     this.logger.debug('Getting Mercado Pago payment', { paymentId });
 
     try {
-      const response = await fetch(`${this.baseUrl}/v1/payments/${paymentId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.accessToken}`,
+      const response = await fetch(
+        `${this.baseUrl}${MercadoPagoRoutes.GET_PAYMENT}/${paymentId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.accessToken}`,
+          },
         },
-      });
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
