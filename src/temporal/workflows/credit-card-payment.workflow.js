@@ -11,18 +11,20 @@ const activities = proxyActivities({
 });
 
 export async function creditCardPaymentWorkflow(paymentInput) {
-  const { cpf, description, amount, paymentMethod } = paymentInput;
+  const { cpf, description, amount, paymentMethod, id } = paymentInput;
 
-  const paymentData = {
-    id: paymentInput.id || crypto.randomUUID(),
+  if (!id) {
+    throw new Error('Payment ID is required');
+  }
+
+  const payment = {
+    id,
     cpf,
     description,
     amount,
     payment_method: paymentMethod,
     status: 'PENDING',
   };
-
-  const payment = await activities.createPaymentRecord(paymentData);
 
   let mercadoPagoPreference;
   try {
@@ -37,15 +39,14 @@ export async function creditCardPaymentWorkflow(paymentInput) {
   let paymentStatus = 'PENDING';
   let attempts = 0;
   const maxAttempts = 20;
-  const initialDelay = 5000;
+  const initialDelay = 3000;
 
   while (paymentStatus === 'PENDING' && attempts < maxAttempts) {
-    const delay = initialDelay * Math.pow(1.5, attempts);
+    const delay = initialDelay * Math.pow(1.2, attempts);
     await sleep(delay);
 
     try {
       const mercadoPagoPayment = await activities.checkPaymentStatus(payment.id);
-
       const mappedStatus = await activities.mapMercadoPagoStatusToPaymentStatus(mercadoPagoPayment.status);
 
       if (mappedStatus !== 'PENDING') {
@@ -53,7 +54,7 @@ export async function creditCardPaymentWorkflow(paymentInput) {
         paymentStatus = mappedStatus;
       }
     } catch (error) {
-      console.error(`Attempt ${attempts + 1} failed to check payment status:`, error.message);
+      console.error(`[Workflow] Attempt ${attempts + 1} failed to check payment status:`, error.message);
     }
 
     attempts++;
@@ -63,6 +64,7 @@ export async function creditCardPaymentWorkflow(paymentInput) {
     await activities.updatePaymentStatus(payment.id, 'FAIL', {
       error: 'Payment timeout - no status update from Mercado Pago',
     });
+
     throw new Error('Payment processing timeout');
   }
 
