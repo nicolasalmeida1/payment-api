@@ -10,6 +10,12 @@ const logger = new Logger('PaymentActivities');
 
 const useMock = !process.env.MERCADO_PAGO_ACCESS_TOKEN || process.env.USE_MERCADO_PAGO_MOCK === 'true';
 
+/**
+ * Temporal activity: Creates a payment record in the database
+ * @param {PaymentData} paymentData - Payment data to insert
+ * @returns {Promise<Payment>} Created payment record
+ * @throws {Error} If payment creation fails
+ */
 export async function createPaymentRecord(paymentData) {
   logger.info('Creating payment record in database', { paymentId: paymentData.id });
 
@@ -51,6 +57,12 @@ export async function createPaymentRecord(paymentData) {
   }
 }
 
+/**
+ * Temporal activity: Creates a payment preference in Mercado Pago
+ * @param {Payment} payment - Payment object
+ * @returns {Promise<MercadoPagoPreferenceResponse>} Preference data
+ * @throws {Error} If preference creation fails
+ */
 export async function createMercadoPagoPreference(payment) {
   const mercadoPagoService = useMock ? new MercadoPagoMockService() : new MercadoPagoService();
 
@@ -77,6 +89,12 @@ export async function createMercadoPagoPreference(payment) {
   }
 }
 
+/**
+ * Temporal activity: Checks payment status from Mercado Pago
+ * @param {string} mercadoPagoPaymentId - Mercado Pago payment identifier
+ * @returns {Promise<MercadoPagoStatusResponse>} Payment status information
+ * @throws {Error} If status check fails
+ */
 export async function checkPaymentStatus(mercadoPagoPaymentId) {
   const mercadoPagoService = useMock ? new MercadoPagoMockService() : new MercadoPagoService();
 
@@ -103,6 +121,14 @@ export async function checkPaymentStatus(mercadoPagoPaymentId) {
   }
 }
 
+/**
+ * Temporal activity: Updates payment status in database
+ * @param {string} paymentId - Payment identifier
+ * @param {PaymentStatusType} newStatus - New payment status
+ * @param {Object} [mercadoPagoData] - Optional Mercado Pago metadata
+ * @returns {Promise<UpdatePaymentStatusResult>} Update result
+ * @throws {Error} If payment not found or update fails
+ */
 export async function updatePaymentStatus(paymentId, newStatus, mercadoPagoData) {
   logger.info('Updating payment status', { paymentId, newStatus });
 
@@ -155,6 +181,11 @@ export async function updatePaymentStatus(paymentId, newStatus, mercadoPagoData)
   }
 }
 
+/**
+ * Maps Mercado Pago status to internal payment status
+ * @param {MercadoPagoStatusType} mercadoPagoStatus - Mercado Pago status
+ * @returns {PaymentStatusType} Internal payment status
+ */
 export function mapMercadoPagoStatusToPaymentStatus(mercadoPagoStatus) {
   const statusMap = {
     approved: PaymentStatus.PAID,

@@ -5,6 +5,11 @@ const logger = new Logger('TemporalClient');
 
 let clientInstance = null;
 
+/**
+ * Gets or creates a Temporal client instance (singleton)
+ * @returns {Promise<Client>} Temporal client instance
+ * @throws {Error} If connection fails
+ */
 export async function getTemporalClient() {
   if (clientInstance) {
     return clientInstance;
@@ -30,6 +35,12 @@ export async function getTemporalClient() {
   }
 }
 
+/**
+ * Starts a credit card payment workflow in Temporal
+ * @param {PaymentWorkflowInput} paymentData - Payment workflow input data
+ * @returns {Promise<WorkflowResponse>} Workflow ID and run ID
+ * @throws {Error} If workflow start fails
+ */
 export async function startCreditCardPaymentWorkflow(paymentData) {
   try {
     const client = await getTemporalClient();
@@ -63,6 +74,12 @@ export async function startCreditCardPaymentWorkflow(paymentData) {
   }
 }
 
+/**
+ * Gets the result of a completed credit card payment workflow
+ * @param {string} workflowId - Workflow identifier
+ * @returns {Promise<PaymentWorkflowResult>} Workflow execution result
+ * @throws {Error} If workflow not found or failed
+ */
 export async function getCreditCardPaymentWorkflowResult(workflowId) {
   try {
     const client = await getTemporalClient();
@@ -87,6 +104,12 @@ export async function getCreditCardPaymentWorkflowResult(workflowId) {
   }
 }
 
+/**
+ * Gets the current status of a credit card payment workflow
+ * @param {string} workflowId - Workflow identifier
+ * @returns {Promise<WorkflowStatusResponse>} Workflow status information
+ * @throws {Error} If workflow not found
+ */
 export async function getCreditCardPaymentWorkflowStatus(workflowId) {
   try {
     const client = await getTemporalClient();
@@ -117,6 +140,10 @@ export async function getCreditCardPaymentWorkflowStatus(workflowId) {
   }
 }
 
+/**
+ * Closes the Temporal client connection
+ * @returns {Promise<void>}
+ */
 export async function closeTemporalClient() {
   if (clientInstance) {
     await clientInstance.connection.close();

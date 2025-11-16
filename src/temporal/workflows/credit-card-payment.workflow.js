@@ -10,6 +10,13 @@ const activities = proxyActivities({
   },
 });
 
+/**
+ * Temporal workflow for processing credit card payments
+ * Orchestrates payment preference creation and status polling
+ * @param {PaymentWorkflowInput} paymentInput - Payment workflow input data
+ * @returns {Promise<PaymentWorkflowResult>} Workflow execution result
+ * @throws {Error} If payment ID is missing or workflow fails
+ */
 export async function creditCardPaymentWorkflow(paymentInput) {
   const { cpf, description, amount, paymentMethod, id } = paymentInput;
 

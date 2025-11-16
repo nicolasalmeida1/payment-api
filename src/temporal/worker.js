@@ -9,6 +9,11 @@ const logger = new Logger('TemporalWorker');
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+/**
+ * Creates a Temporal worker instance
+ * @returns {Promise<Worker>} Configured Temporal worker
+ * @throws {Error} If worker creation fails
+ */
 export async function createWorker() {
   try {
     const workflowsPath = path.join(__dirname, 'workflows');
@@ -35,6 +40,11 @@ export async function createWorker() {
   }
 }
 
+/**
+ * Runs the Temporal worker
+ * @returns {Promise<void>}
+ * @throws {Error} If worker execution fails
+ */
 export async function runWorker() {
   const worker = await createWorker();
 
