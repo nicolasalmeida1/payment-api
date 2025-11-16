@@ -29,6 +29,10 @@ export default defineConfig([
       'no-undef': 'off',
       semi: ['error', 'always'],
       quotes: ['error', 'single'],
+      'padding-line-between-statements': [
+        'error',
+        { blankLine: 'always', prev: '*', next: 'return' },
+      ],
     },
   },
 ]);
