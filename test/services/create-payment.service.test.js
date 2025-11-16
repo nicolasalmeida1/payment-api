@@ -32,6 +32,56 @@ describe('CreatePaymentService', () => {
   });
 
   describe('execute', () => {
+    it('should create PIX payment with PENDING status', async () => {
+      const validatedData = {
+        id: '550e8400-e29b-41d4-a716-446655440000',
+        cpf: '12345678901',
+        description: 'PIX payment test',
+        amount: 100.5,
+        paymentMethod: 'PIX',
+      };
+
+      const expectedPayment = {
+        id: validatedData.id,
+        cpf: validatedData.cpf,
+        description: validatedData.description,
+        amount: validatedData.amount,
+        payment_method: 'PIX',
+        status: 'PENDING',
+      };
+
+      mockPaymentRepository.startTransaction.mockResolvedValue({});
+      mockPaymentRepository.create.mockResolvedValue(expectedPayment);
+      mockPaymentHistoryRepository.create.mockResolvedValue({});
+      mockPaymentRepository.commitTransaction.mockResolvedValue();
+
+      const result = await service.execute(validatedData);
+
+      expect(result).toEqual({
+        success: true,
+        data: expectedPayment,
+      });
+
+      expect(expectedPayment.payment_method).toBe('PIX');
+      expect(expectedPayment.status).toBe('PENDING');
+
+      expect(mockPaymentRepository.create).toHaveBeenCalledWith({
+        id: validatedData.id,
+        cpf: validatedData.cpf,
+        description: validatedData.description,
+        amount: validatedData.amount,
+        payment_method: 'PIX',
+        status: 'PENDING',
+      });
+
+      expect(service.logger.info).toHaveBeenCalledWith('Creating payment', {
+        paymentId: validatedData.id,
+        cpf: validatedData.cpf,
+        amount: validatedData.amount,
+        paymentMethod: 'PIX',
+      });
+    });
+
     it('should create payment successfully', async () => {
       const validatedData = {
         id: '550e8400-e29b-41d4-a716-446655440000',
@@ -94,12 +144,15 @@ describe('CreatePaymentService', () => {
         paymentId: validatedData.id,
         cpf: validatedData.cpf,
         amount: validatedData.amount,
+        paymentMethod: 'PIX',
       });
 
       expect(service.logger.info).toHaveBeenCalledWith(
         'Payment created successfully',
         {
           paymentId: expectedPayment.id,
+          paymentMethod: 'PIX',
+          status: 'PENDING',
         },
       );
     });

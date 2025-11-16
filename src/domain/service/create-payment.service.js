@@ -38,6 +38,7 @@ export default class CreatePaymentService {
       paymentId: validatedData.id,
       cpf: validatedData.cpf,
       amount: validatedData.amount,
+      paymentMethod: validatedData.paymentMethod,
     });
 
     try {
@@ -54,6 +55,8 @@ export default class CreatePaymentService {
 
       this.logger.info('Payment created successfully', {
         paymentId: payment.id,
+        paymentMethod: validatedData.paymentMethod,
+        status: payment.status,
       });
 
       return {
