@@ -57,9 +57,7 @@ describe('BaseCommand', () => {
       const error = new Error('Test error');
       const context = { paymentId: '123' };
 
-      await expect(baseCommand.handleError(error, context)).rejects.toThrow(
-        'Test error',
-      );
+      await expect(baseCommand.handleError(error, context)).rejects.toThrow('Test error');
     });
   });
 });

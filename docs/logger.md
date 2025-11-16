@@ -150,7 +150,7 @@ export default class CreatePaymentService {
       const payment = await this.paymentRepository.createWithHistory(
         paymentData,
         historyData,
-        this.paymentHistoryRepository,
+        this.paymentHistoryRepository
       );
 
       this.logger.info('Payment created successfully', {

@@ -3,11 +3,7 @@ import Logger from '../../infrastructure/logger/logger.js';
 import { PaymentStatus, PaymentEvent, PaymentMethod } from '../enums/index.js';
 
 export default class CreatePaymentService {
-  constructor({
-    paymentRepository,
-    paymentHistoryRepository,
-    mercadoPagoService,
-  }) {
+  constructor({ paymentRepository, paymentHistoryRepository, mercadoPagoService }) {
     this.paymentRepository = paymentRepository;
     this.paymentHistoryRepository = paymentHistoryRepository;
     this.mercadoPagoService = mercadoPagoService;
@@ -45,16 +41,7 @@ export default class CreatePaymentService {
     });
 
     try {
-      const preferenceData =
-        this.mercadoPagoService.buildPreferenceData(payment);
-      const mercadoPagoPreference =
-        await this.mercadoPagoService.createPreference(preferenceData);
-
-      this.logger.info('Mercado Pago preference created', {
-        paymentId: payment.id,
-        preferenceId: mercadoPagoPreference.id,
-        initPoint: mercadoPagoPreference.init_point,
-      });
+      const mercadoPagoPreference = await this.mercadoPagoService.createPreference(payment);
 
       return {
         preference_id: mercadoPagoPreference.id,

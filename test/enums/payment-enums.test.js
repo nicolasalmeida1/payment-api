@@ -1,8 +1,4 @@
-import {
-  PaymentStatus,
-  PaymentMethod,
-  PaymentEvent,
-} from '../../src/domain/enums/index.js';
+import { PaymentStatus, PaymentMethod, PaymentEvent } from '../../src/domain/enums/index.js';
 
 describe('Payment Enums', () => {
   describe('PaymentStatus', () => {
@@ -43,9 +39,7 @@ describe('Payment Enums', () => {
     });
 
     it('should have PAYMENT_STATUS_CHANGED event', () => {
-      expect(PaymentEvent.PAYMENT_STATUS_CHANGED).toBe(
-        'PAYMENT_STATUS_CHANGED',
-      );
+      expect(PaymentEvent.PAYMENT_STATUS_CHANGED).toBe('PAYMENT_STATUS_CHANGED');
     });
 
     it('should have exactly 2 events', () => {

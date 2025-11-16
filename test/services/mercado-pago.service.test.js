@@ -17,22 +17,17 @@ describe('MercadoPagoService', () => {
 
   describe('createPreference', () => {
     it('should create preference successfully', async () => {
-      const preferenceData = {
-        items: [
-          {
-            id: 'test-id',
-            title: 'Test Payment',
-            quantity: 1,
-            currency_id: 'BRL',
-            unit_price: 100,
-          },
-        ],
+      const payment = {
+        id: 'payment-123',
+        cpf: '12345678901',
+        description: 'Test Payment Description',
+        amount: 150.5,
       };
 
       const mockResponse = {
         id: 'preference-id-123',
         init_point: 'https://mercadopago.com/checkout/preference-id-123',
-        items: preferenceData.items,
+        sandbox_init_point: 'https://sandbox.mercadopago.com/checkout/preference-id-123',
       };
 
       global.fetch.mockResolvedValue({
@@ -40,25 +35,33 @@ describe('MercadoPagoService', () => {
         json: jest.fn().mockResolvedValue(mockResponse),
       });
 
-      const result = await service.createPreference(preferenceData);
+      const result = await service.createPreference(payment);
 
       expect(result).toEqual(mockResponse);
       expect(global.fetch).toHaveBeenCalledWith(
         'https://api.mercadopago.com/checkout/preferences',
-        {
+        expect.objectContaining({
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${mockAccessToken}`,
           },
-          body: JSON.stringify(preferenceData),
-        },
+        })
       );
+
+      const callArgs = global.fetch.mock.calls[0][1];
+      const body = JSON.parse(callArgs.body);
+      expect(body.items[0].id).toBe('payment-123');
+      expect(body.external_reference).toBe('payment-123');
+      expect(body.payer.identification.number).toBe('12345678901');
     });
 
     it('should throw error when API returns error', async () => {
-      const preferenceData = {
-        items: [],
+      const payment = {
+        id: 'payment-123',
+        cpf: '12345678901',
+        description: 'Test Payment',
+        amount: 100,
       };
 
       const mockError = {
@@ -74,21 +77,20 @@ describe('MercadoPagoService', () => {
         json: jest.fn().mockResolvedValue(mockError),
       });
 
-      await expect(service.createPreference(preferenceData)).rejects.toThrow(
-        'Mercado Pago API error',
-      );
+      await expect(service.createPreference(payment)).rejects.toThrow('Mercado Pago API error');
     });
 
     it('should handle network errors', async () => {
-      const preferenceData = {
-        items: [],
+      const payment = {
+        id: 'payment-123',
+        cpf: '12345678901',
+        description: 'Test Payment',
+        amount: 100,
       };
 
       global.fetch.mockRejectedValue(new Error('Network error'));
 
-      await expect(service.createPreference(preferenceData)).rejects.toThrow(
-        'Network error',
-      );
+      await expect(service.createPreference(payment)).rejects.toThrow('Network error');
     });
   });
 
@@ -156,16 +158,13 @@ describe('MercadoPagoService', () => {
       const result = await service.getPreference(preferenceId);
 
       expect(result).toEqual(mockResponse);
-      expect(global.fetch).toHaveBeenCalledWith(
-        `https://api.mercadopago.com/checkout/preferences/${preferenceId}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${mockAccessToken}`,
-          },
+      expect(global.fetch).toHaveBeenCalledWith(`https://api.mercadopago.com/checkout/preferences/${preferenceId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${mockAccessToken}`,
         },
-      );
+      });
     });
 
     it('should throw error when preference not found', async () => {
@@ -178,9 +177,7 @@ describe('MercadoPagoService', () => {
         json: jest.fn().mockResolvedValue({ message: 'Not found' }),
       });
 
-      await expect(service.getPreference(preferenceId)).rejects.toThrow(
-        'Mercado Pago API error',
-      );
+      await expect(service.getPreference(preferenceId)).rejects.toThrow('Mercado Pago API error');
     });
   });
 
@@ -201,16 +198,13 @@ describe('MercadoPagoService', () => {
       const result = await service.getPayment(paymentId);
 
       expect(result).toEqual(mockResponse);
-      expect(global.fetch).toHaveBeenCalledWith(
-        `https://api.mercadopago.com/v1/payments/${paymentId}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${mockAccessToken}`,
-          },
+      expect(global.fetch).toHaveBeenCalledWith(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${mockAccessToken}`,
         },
-      );
+      });
     });
 
     it('should throw error when payment not found', async () => {
@@ -223,9 +217,7 @@ describe('MercadoPagoService', () => {
         json: jest.fn().mockResolvedValue({ message: 'Payment not found' }),
       });
 
-      await expect(service.getPayment(paymentId)).rejects.toThrow(
-        'Mercado Pago API error',
-      );
+      await expect(service.getPayment(paymentId)).rejects.toThrow('Mercado Pago API error');
     });
   });
 

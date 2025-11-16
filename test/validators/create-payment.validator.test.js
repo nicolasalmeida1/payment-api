@@ -55,9 +55,7 @@ describe('CreatePaymentValidator', () => {
       const { error } = createPaymentSchema.validate(invalidData);
 
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe(
-        'cpf must contain 11 numeric digits',
-      );
+      expect(error.details[0].message).toBe('cpf must contain 11 numeric digits');
     });
 
     it('should fail when cpf contains non-numeric characters', () => {
@@ -170,9 +168,7 @@ describe('CreatePaymentValidator', () => {
       const { error } = createPaymentSchema.validate(invalidData);
 
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe(
-        'paymentMethod must be PIX or CREDIT_CARD',
-      );
+      expect(error.details[0].message).toBe('paymentMethod must be PIX or CREDIT_CARD');
     });
   });
 });

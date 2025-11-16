@@ -55,9 +55,7 @@ describe('UpdatePaymentCommand', () => {
         status: 'INVALID_STATUS',
       };
 
-      await expect(command.execute(id, input)).rejects.toThrow(
-        'Validation failed:',
-      );
+      await expect(command.execute(id, input)).rejects.toThrow('Validation failed:');
       expect(mockUpdatePaymentService.execute).not.toHaveBeenCalled();
     });
 
@@ -65,9 +63,7 @@ describe('UpdatePaymentCommand', () => {
       const id = '550e8400-e29b-41d4-a716-446655440000';
       const input = {};
 
-      await expect(command.execute(id, input)).rejects.toThrow(
-        'Validation failed:',
-      );
+      await expect(command.execute(id, input)).rejects.toThrow('Validation failed:');
       expect(mockUpdatePaymentService.execute).not.toHaveBeenCalled();
     });
 
@@ -77,9 +73,7 @@ describe('UpdatePaymentCommand', () => {
         amount: -100,
       };
 
-      await expect(command.execute(id, input)).rejects.toThrow(
-        'Validation failed:',
-      );
+      await expect(command.execute(id, input)).rejects.toThrow('Validation failed:');
       expect(mockUpdatePaymentService.execute).not.toHaveBeenCalled();
     });
 
@@ -89,9 +83,7 @@ describe('UpdatePaymentCommand', () => {
         description: '',
       };
 
-      await expect(command.execute(id, input)).rejects.toThrow(
-        'Validation failed:',
-      );
+      await expect(command.execute(id, input)).rejects.toThrow('Validation failed:');
       expect(mockUpdatePaymentService.execute).not.toHaveBeenCalled();
     });
 

@@ -69,9 +69,7 @@ describe('UpdatePaymentService', () => {
       });
 
       expect(mockPaymentRepository.startTransaction).toHaveBeenCalled();
-      expect(mockPaymentHistoryRepository.setTransaction).toHaveBeenCalledWith(
-        mockPaymentRepository.trx,
-      );
+      expect(mockPaymentHistoryRepository.setTransaction).toHaveBeenCalledWith(mockPaymentRepository.trx);
 
       expect(mockPaymentRepository.update).toHaveBeenCalledWith(id, {
         status: 'PAID',
@@ -133,9 +131,7 @@ describe('UpdatePaymentService', () => {
 
       mockPaymentRepository.findById.mockResolvedValue(null);
 
-      await expect(service.execute(id, validatedData)).rejects.toThrow(
-        'Payment not found',
-      );
+      await expect(service.execute(id, validatedData)).rejects.toThrow('Payment not found');
 
       expect(mockPaymentRepository.update).not.toHaveBeenCalled();
     });
@@ -183,9 +179,7 @@ describe('UpdatePaymentService', () => {
 
       mockPaymentRepository.findById.mockResolvedValue(paidPayment);
 
-      await expect(service.execute(id, validatedData)).rejects.toThrow(
-        'Payment already paid and cannot be modified',
-      );
+      await expect(service.execute(id, validatedData)).rejects.toThrow('Payment already paid and cannot be modified');
 
       expect(mockPaymentRepository.startTransaction).not.toHaveBeenCalled();
       expect(mockPaymentRepository.update).not.toHaveBeenCalled();
@@ -201,9 +195,7 @@ describe('UpdatePaymentService', () => {
       mockPaymentRepository.findById.mockRejectedValue(error);
       mockPaymentRepository.rollbackTransaction.mockResolvedValue();
 
-      await expect(service.execute(id, validatedData)).rejects.toThrow(
-        'Database error',
-      );
+      await expect(service.execute(id, validatedData)).rejects.toThrow('Database error');
 
       expect(mockPaymentRepository.rollbackTransaction).toHaveBeenCalled();
     });

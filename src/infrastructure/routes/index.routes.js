@@ -2,6 +2,7 @@ import CreatePaymentCommandFactory from '../factories/add-payment-command.factor
 import UpdatePaymentCommandFactory from '../factories/update-payment-command.factory.js';
 import GetPaymentByIdCommandFactory from '../factories/get-payment-by-id-command.factory.js';
 import ListPaymentsCommandFactory from '../factories/list-payments-command.factory.js';
+import ProcessMercadoPagoWebhookCommandFactory from '../factories/process-mercado-pago-webhook-command.factory.js';
 
 export default async function routes(fastify) {
   fastify.post('/api/payment', async (request, response) => {
@@ -67,6 +68,23 @@ export default async function routes(fastify) {
       response.status(400).send({
         success: false,
         message: error.message || 'Error listing payments',
+      });
+    }
+  });
+
+  fastify.post('/api/webhooks/mercado-pago', async (request, response) => {
+    const command = ProcessMercadoPagoWebhookCommandFactory.create();
+    const webhookData = request.body;
+
+    try {
+      const result = await command.execute(webhookData);
+
+      response.send(result);
+    } catch (error) {
+      const statusCode = error.message === 'Payment not found' ? 404 : 400;
+      response.status(statusCode).send({
+        success: false,
+        message: error.message || 'Error processing webhook',
       });
     }
   });

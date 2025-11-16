@@ -1,9 +1,6 @@
 import Logger from '../../infrastructure/logger/logger.js';
 import { PaymentEvent, PaymentStatus } from '../enums/index.js';
-import {
-  PaymentNotFoundError,
-  PaymentAlreadyPaidError,
-} from '../errors/domain.errors.js';
+import { PaymentNotFoundError, PaymentAlreadyPaidError } from '../errors/domain.errors.js';
 
 export default class UpdatePaymentService {
   constructor({ paymentRepository, paymentHistoryRepository }) {
@@ -15,17 +12,14 @@ export default class UpdatePaymentService {
   buildUpdateData(validatedData) {
     const updateData = {};
     if (validatedData.status) updateData.status = validatedData.status;
-    if (validatedData.description)
-      updateData.description = validatedData.description;
+    if (validatedData.description) updateData.description = validatedData.description;
     if (validatedData.amount) updateData.amount = validatedData.amount;
 
     return updateData;
   }
 
   shouldCreateHistoryEntry(validatedData, existingPayment) {
-    return (
-      validatedData.status && validatedData.status !== existingPayment.status
-    );
+    return validatedData.status && validatedData.status !== existingPayment.status;
   }
 
   async createStatusHistoryEntry(id, oldStatus, newStatus) {
@@ -68,17 +62,10 @@ export default class UpdatePaymentService {
       this.paymentHistoryRepository.setTransaction(this.paymentRepository.trx);
 
       const updateData = this.buildUpdateData(validatedData);
-      const updatedPayment = await this.paymentRepository.update(
-        id,
-        updateData,
-      );
+      const updatedPayment = await this.paymentRepository.update(id, updateData);
 
       if (this.shouldCreateHistoryEntry(validatedData, existingPayment)) {
-        await this.createStatusHistoryEntry(
-          id,
-          existingPayment.status,
-          validatedData.status,
-        );
+        await this.createStatusHistoryEntry(id, existingPayment.status, validatedData.status);
       }
 
       await this.paymentRepository.commitTransaction();

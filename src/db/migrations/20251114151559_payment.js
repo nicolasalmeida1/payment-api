@@ -1,5 +1,5 @@
 export function up(knex) {
-  return knex.schema.createTable('payment', (table) => {
+  return knex.schema.createTable('payment', table => {
     table.uuid('id').primary();
     table.string('cpf', 11).notNullable();
     table.string('description').notNullable();

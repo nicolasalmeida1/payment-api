@@ -4,8 +4,7 @@ import { MercadoPagoRoutes } from '../../domain/enums/mercado-pago-routes.enum.j
 export default class MercadoPagoService {
   constructor() {
     this.logger = new Logger('MercadoPagoService');
-    this.baseUrl =
-      process.env.MERCADO_PAGO_BASE_URL || 'https://api.mercadopago.com';
+    this.baseUrl = process.env.MERCADO_PAGO_BASE_URL || 'https://api.mercadopago.com';
     this.accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN;
 
     if (!this.accessToken) {
@@ -13,21 +12,22 @@ export default class MercadoPagoService {
     }
   }
 
-  async createPreference(preferenceData) {
-    this.logger.debug('Creating Mercado Pago preference', { preferenceData });
+  async createPreference(payment) {
+    this.logger.debug('Creating Mercado Pago preference', {
+      paymentId: payment.id,
+    });
+
+    const preferenceData = this.buildPreferenceData(payment);
 
     try {
-      const response = await fetch(
-        `${this.baseUrl}${MercadoPagoRoutes.CREATE_PREFERENCE}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${this.accessToken}`,
-          },
-          body: JSON.stringify(preferenceData),
+      const response = await fetch(`${this.baseUrl}${MercadoPagoRoutes.CREATE_PREFERENCE}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.accessToken}`,
         },
-      );
+        body: JSON.stringify(preferenceData),
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -37,9 +37,7 @@ export default class MercadoPagoService {
           error: errorData,
         });
 
-        throw new Error(
-          `Mercado Pago API error: ${response.status} - ${JSON.stringify(errorData)}`,
-        );
+        throw new Error(`Mercado Pago API error: ${response.status} - ${JSON.stringify(errorData)}`);
       }
 
       const data = await response.json();
@@ -106,16 +104,13 @@ export default class MercadoPagoService {
     this.logger.debug('Getting Mercado Pago preference', { preferenceId });
 
     try {
-      const response = await fetch(
-        `${this.baseUrl}${MercadoPagoRoutes.GET_PREFERENCE}/${preferenceId}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${this.accessToken}`,
-          },
+      const response = await fetch(`${this.baseUrl}${MercadoPagoRoutes.GET_PREFERENCE}/${preferenceId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.accessToken}`,
         },
-      );
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -125,9 +120,7 @@ export default class MercadoPagoService {
           error: errorData,
         });
 
-        throw new Error(
-          `Mercado Pago API error: ${response.status} - ${JSON.stringify(errorData)}`,
-        );
+        throw new Error(`Mercado Pago API error: ${response.status} - ${JSON.stringify(errorData)}`);
       }
 
       const data = await response.json();
@@ -149,16 +142,13 @@ export default class MercadoPagoService {
     this.logger.debug('Getting Mercado Pago payment', { paymentId });
 
     try {
-      const response = await fetch(
-        `${this.baseUrl}${MercadoPagoRoutes.GET_PAYMENT}/${paymentId}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${this.accessToken}`,
-          },
+      const response = await fetch(`${this.baseUrl}${MercadoPagoRoutes.GET_PAYMENT}/${paymentId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.accessToken}`,
         },
-      );
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -168,9 +158,7 @@ export default class MercadoPagoService {
           error: errorData,
         });
 
-        throw new Error(
-          `Mercado Pago API error: ${response.status} - ${JSON.stringify(errorData)}`,
-        );
+        throw new Error(`Mercado Pago API error: ${response.status} - ${JSON.stringify(errorData)}`);
       }
 
       const data = await response.json();

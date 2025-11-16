@@ -26,9 +26,7 @@ describe('ListPaymentsCommandFactory', () => {
       const command2 = ListPaymentsCommandFactory.create();
 
       expect(command1).not.toBe(command2);
-      expect(command1.listPaymentsService).not.toBe(
-        command2.listPaymentsService,
-      );
+      expect(command1.listPaymentsService).not.toBe(command2.listPaymentsService);
     });
   });
 });

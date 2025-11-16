@@ -55,9 +55,7 @@ describe('UpdatePaymentValidator', () => {
       const { error } = updatePaymentSchema.validate(invalidData);
 
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe(
-        'status must be PENDING, PAID or FAIL',
-      );
+      expect(error.details[0].message).toBe('status must be PENDING, PAID or FAIL');
     });
   });
 
@@ -104,9 +102,7 @@ describe('UpdatePaymentValidator', () => {
       const { error } = updatePaymentSchema.validate(invalidData);
 
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe(
-        'At least one field must be provided for update',
-      );
+      expect(error.details[0].message).toBe('At least one field must be provided for update');
     });
   });
 });

@@ -27,9 +27,7 @@ export default class PaymentRepository extends BaseRepository {
   async update(id, paymentData) {
     this.logger.debug('Updating payment', { paymentId: id, ...paymentData });
 
-    const updatedPayment = await Payment.query(this.trx)
-      .findById(id)
-      .patch(paymentData);
+    const updatedPayment = await Payment.query(this.trx).findById(id).patch(paymentData);
 
     if (updatedPayment === 0) {
       this.logger.warn('Payment not found for update', { paymentId: id });

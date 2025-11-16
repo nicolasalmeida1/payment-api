@@ -105,9 +105,7 @@ describe('ListPaymentsValidator', () => {
       const { error } = listPaymentsSchema.validate(invalidData);
 
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe(
-        'cpf must contain 11 numeric digits',
-      );
+      expect(error.details[0].message).toBe('cpf must contain 11 numeric digits');
     });
 
     it('should fail when cpf contains non-numeric characters', () => {
@@ -130,9 +128,7 @@ describe('ListPaymentsValidator', () => {
       const { error } = listPaymentsSchema.validate(invalidData);
 
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe(
-        'paymentMethod must be PIX or CREDIT_CARD',
-      );
+      expect(error.details[0].message).toBe('paymentMethod must be PIX or CREDIT_CARD');
     });
   });
 
@@ -145,9 +141,7 @@ describe('ListPaymentsValidator', () => {
       const { error } = listPaymentsSchema.validate(invalidData);
 
       expect(error).toBeDefined();
-      expect(error.details[0].message).toBe(
-        'status must be PENDING, PAID or FAIL',
-      );
+      expect(error.details[0].message).toBe('status must be PENDING, PAID or FAIL');
     });
   });
 });

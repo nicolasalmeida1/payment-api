@@ -48,7 +48,7 @@ describe('CreatePaymentService', () => {
       };
 
       mockPaymentRepository.startTransaction.mockResolvedValue({});
-      mockPaymentRepository.create.mockImplementation((data) => ({
+      mockPaymentRepository.create.mockImplementation(data => ({
         ...data,
         id: data.id,
       }));
@@ -85,7 +85,7 @@ describe('CreatePaymentService', () => {
       };
 
       mockPaymentRepository.startTransaction.mockResolvedValue({});
-      mockPaymentRepository.create.mockImplementation((data) => ({
+      mockPaymentRepository.create.mockImplementation(data => ({
         ...data,
         id: data.id,
       }));
@@ -99,9 +99,7 @@ describe('CreatePaymentService', () => {
       expect(typeof result.data.id).toBe('string');
 
       expect(mockPaymentRepository.startTransaction).toHaveBeenCalled();
-      expect(mockPaymentHistoryRepository.setTransaction).toHaveBeenCalledWith(
-        mockPaymentRepository.trx,
-      );
+      expect(mockPaymentHistoryRepository.setTransaction).toHaveBeenCalledWith(mockPaymentRepository.trx);
 
       const createPaymentCall = mockPaymentRepository.create.mock.calls[0][0];
 
@@ -114,8 +112,7 @@ describe('CreatePaymentService', () => {
       });
       expect(createPaymentCall.id).toBeDefined();
 
-      const createHistoryCall =
-        mockPaymentHistoryRepository.create.mock.calls[0][0];
+      const createHistoryCall = mockPaymentHistoryRepository.create.mock.calls[0][0];
 
       expect(createHistoryCall.payment_id).toBe(createPaymentCall.id);
       expect(createHistoryCall.event).toBe('PAYMENT_CREATED');
@@ -131,38 +128,20 @@ describe('CreatePaymentService', () => {
         paymentMethod: 'CREDIT_CARD',
       };
 
-      const mockPreferenceData = {
-        items: [
-          {
-            id: expect.any(String),
-            title: validatedData.description,
-            quantity: 1,
-            currency_id: 'BRL',
-            unit_price: validatedData.amount,
-          },
-        ],
-      };
-
       const mockMercadoPagoResponse = {
         id: 'preference-123',
         init_point: 'https://mercadopago.com/checkout/preference-123',
-        sandbox_init_point:
-          'https://sandbox.mercadopago.com/checkout/preference-123',
+        sandbox_init_point: 'https://sandbox.mercadopago.com/checkout/preference-123',
       };
 
       mockPaymentRepository.startTransaction.mockResolvedValue({});
-      mockPaymentRepository.create.mockImplementation((data) => ({
+      mockPaymentRepository.create.mockImplementation(data => ({
         ...data,
         id: data.id,
       }));
       mockPaymentHistoryRepository.create.mockResolvedValue({});
       mockPaymentRepository.commitTransaction.mockResolvedValue();
-      mockMercadoPagoService.buildPreferenceData.mockReturnValue(
-        mockPreferenceData,
-      );
-      mockMercadoPagoService.createPreference.mockResolvedValue(
-        mockMercadoPagoResponse,
-      );
+      mockMercadoPagoService.createPreference.mockResolvedValue(mockMercadoPagoResponse);
 
       const result = await service.execute(validatedData);
 
@@ -171,20 +150,16 @@ describe('CreatePaymentService', () => {
       expect(result.data.status).toBe('PENDING');
       expect(result.mercadoPago).toBeDefined();
       expect(result.mercadoPago.preference_id).toBe('preference-123');
-      expect(result.mercadoPago.init_point).toBe(
-        'https://mercadopago.com/checkout/preference-123',
-      );
+      expect(result.mercadoPago.init_point).toBe('https://mercadopago.com/checkout/preference-123');
 
-      expect(mockMercadoPagoService.buildPreferenceData).toHaveBeenCalledWith(
+      // Verifica se createPreference foi chamado com o payment object
+      expect(mockMercadoPagoService.createPreference).toHaveBeenCalledWith(
         expect.objectContaining({
           cpf: validatedData.cpf,
           description: validatedData.description,
           amount: validatedData.amount,
           payment_method: 'CREDIT_CARD',
-        }),
-      );
-      expect(mockMercadoPagoService.createPreference).toHaveBeenCalledWith(
-        mockPreferenceData,
+        })
       );
     });
 
@@ -197,7 +172,7 @@ describe('CreatePaymentService', () => {
       };
 
       mockPaymentRepository.startTransaction.mockResolvedValue({});
-      mockPaymentRepository.create.mockImplementation((data) => ({
+      mockPaymentRepository.create.mockImplementation(data => ({
         ...data,
         id: data.id,
       }));
@@ -223,21 +198,17 @@ describe('CreatePaymentService', () => {
       const mercadoPagoError = new Error('Mercado Pago API error');
 
       mockPaymentRepository.startTransaction.mockResolvedValue({});
-      mockPaymentRepository.create.mockImplementation((data) => ({
+      mockPaymentRepository.create.mockImplementation(data => ({
         ...data,
         id: data.id,
       }));
       mockPaymentHistoryRepository.create.mockResolvedValue({});
       mockPaymentRepository.commitTransaction.mockResolvedValue();
       mockMercadoPagoService.buildPreferenceData.mockReturnValue({});
-      mockMercadoPagoService.createPreference.mockRejectedValue(
-        mercadoPagoError,
-      );
+      mockMercadoPagoService.createPreference.mockRejectedValue(mercadoPagoError);
       mockPaymentRepository.rollbackTransaction.mockResolvedValue();
 
-      await expect(service.execute(validatedData)).rejects.toThrow(
-        'Mercado Pago API error',
-      );
+      await expect(service.execute(validatedData)).rejects.toThrow('Mercado Pago API error');
 
       expect(mockPaymentRepository.rollbackTransaction).toHaveBeenCalled();
     });
@@ -255,9 +226,7 @@ describe('CreatePaymentService', () => {
       mockPaymentRepository.create.mockRejectedValue(error);
       mockPaymentRepository.rollbackTransaction.mockResolvedValue();
 
-      await expect(service.execute(validatedData)).rejects.toThrow(
-        'Database error',
-      );
+      await expect(service.execute(validatedData)).rejects.toThrow('Database error');
 
       expect(mockPaymentRepository.rollbackTransaction).toHaveBeenCalled();
 

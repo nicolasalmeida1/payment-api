@@ -1,13 +1,8 @@
 export function up(knex) {
-  return knex.schema.createTable('payment_history', (table) => {
+  return knex.schema.createTable('payment_history', table => {
     table.increments('id').primary();
 
-    table
-      .uuid('payment_id')
-      .notNullable()
-      .references('id')
-      .inTable('payment')
-      .onDelete('CASCADE');
+    table.uuid('payment_id').notNullable().references('id').inTable('payment').onDelete('CASCADE');
 
     table.string('event').notNullable();
     table.jsonb('event_data').nullable();

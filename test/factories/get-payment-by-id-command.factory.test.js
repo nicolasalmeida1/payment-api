@@ -26,9 +26,7 @@ describe('GetPaymentByIdCommandFactory', () => {
       const command2 = GetPaymentByIdCommandFactory.create();
 
       expect(command1).not.toBe(command2);
-      expect(command1.getPaymentByIdService).not.toBe(
-        command2.getPaymentByIdService,
-      );
+      expect(command1.getPaymentByIdService).not.toBe(command2.getPaymentByIdService);
     });
   });
 });

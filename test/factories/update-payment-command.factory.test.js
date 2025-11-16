@@ -19,9 +19,7 @@ describe('UpdatePaymentCommandFactory', () => {
 
       expect(command.updatePaymentService).toBeDefined();
       expect(command.updatePaymentService.paymentRepository).toBeDefined();
-      expect(
-        command.updatePaymentService.paymentHistoryRepository,
-      ).toBeDefined();
+      expect(command.updatePaymentService.paymentHistoryRepository).toBeDefined();
     });
 
     it('should create new instances on each call', () => {
@@ -29,9 +27,7 @@ describe('UpdatePaymentCommandFactory', () => {
       const command2 = UpdatePaymentCommandFactory.create();
 
       expect(command1).not.toBe(command2);
-      expect(command1.updatePaymentService).not.toBe(
-        command2.updatePaymentService,
-      );
+      expect(command1.updatePaymentService).not.toBe(command2.updatePaymentService);
     });
   });
 });

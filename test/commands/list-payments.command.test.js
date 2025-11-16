@@ -91,9 +91,7 @@ describe('ListPaymentsCommand', () => {
         cpf: '123',
       };
 
-      await expect(command.execute(filters)).rejects.toThrow(
-        'Validation failed:',
-      );
+      await expect(command.execute(filters)).rejects.toThrow('Validation failed:');
       expect(mockListPaymentsService.execute).not.toHaveBeenCalled();
     });
 
@@ -122,9 +120,7 @@ describe('ListPaymentsCommand', () => {
         paymentMethod: 'INVALID',
       };
 
-      await expect(command.execute(filters)).rejects.toThrow(
-        'Validation failed:',
-      );
+      await expect(command.execute(filters)).rejects.toThrow('Validation failed:');
       expect(mockListPaymentsService.execute).not.toHaveBeenCalled();
     });
 
@@ -133,9 +129,7 @@ describe('ListPaymentsCommand', () => {
         status: 'INVALID_STATUS',
       };
 
-      await expect(command.execute(filters)).rejects.toThrow(
-        'Validation failed:',
-      );
+      await expect(command.execute(filters)).rejects.toThrow('Validation failed:');
       expect(mockListPaymentsService.execute).not.toHaveBeenCalled();
     });
 

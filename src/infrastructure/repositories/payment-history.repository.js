@@ -22,10 +22,7 @@ export default class PaymentHistoryRepository extends BaseRepository {
   async findByPaymentId(paymentId) {
     this.logger.debug('Finding payment history', { paymentId });
 
-    const history = await PaymentHistory.query(this.trx).where(
-      'payment_id',
-      paymentId,
-    );
+    const history = await PaymentHistory.query(this.trx).where('payment_id', paymentId);
 
     this.logger.debug('Payment history found', {
       paymentId,

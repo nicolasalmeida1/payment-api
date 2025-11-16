@@ -66,18 +66,14 @@ describe('CreatePaymentCommand', () => {
         paymentMethod: 'PIX',
       };
 
-      await expect(command.execute(input)).rejects.toThrow(
-        'Validation failed:',
-      );
+      await expect(command.execute(input)).rejects.toThrow('Validation failed:');
       expect(mockCreatePaymentService.execute).not.toHaveBeenCalled();
     });
 
     it('should throw validation error for missing required fields', async () => {
       const input = {};
 
-      await expect(command.execute(input)).rejects.toThrow(
-        'Validation failed:',
-      );
+      await expect(command.execute(input)).rejects.toThrow('Validation failed:');
       expect(mockCreatePaymentService.execute).not.toHaveBeenCalled();
     });
 
@@ -89,9 +85,7 @@ describe('CreatePaymentCommand', () => {
         paymentMethod: 'PIX',
       };
 
-      await expect(command.execute(input)).rejects.toThrow(
-        'Validation failed:',
-      );
+      await expect(command.execute(input)).rejects.toThrow('Validation failed:');
       expect(mockCreatePaymentService.execute).not.toHaveBeenCalled();
     });
 
@@ -103,9 +97,7 @@ describe('CreatePaymentCommand', () => {
         paymentMethod: 'INVALID',
       };
 
-      await expect(command.execute(input)).rejects.toThrow(
-        'Validation failed:',
-      );
+      await expect(command.execute(input)).rejects.toThrow('Validation failed:');
       expect(mockCreatePaymentService.execute).not.toHaveBeenCalled();
     });
 

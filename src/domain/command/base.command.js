@@ -14,7 +14,7 @@ export default class BaseCommand {
     });
 
     if (error) {
-      const errorMessages = error.details.map((detail) => detail.message);
+      const errorMessages = error.details.map(detail => detail.message);
       this.logger.warn('Validation failed', {
         errors: errorMessages,
         ...context,
