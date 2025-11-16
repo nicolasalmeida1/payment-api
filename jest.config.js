@@ -10,6 +10,7 @@ export default {
     '!src/index.js',
     '!src/config/**',
     '!src/db/**',
+    '!src/domain/enum',
     '!src/infrastructure/routes/**',
   ],
   coverageDirectory: 'coverage',
