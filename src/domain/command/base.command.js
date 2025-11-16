@@ -11,6 +11,8 @@ export default class BaseCommand {
 
     const { error, value } = schema.validate(input, {
       abortEarly: false,
+      allowUnknown: true,
+      convert: true,
     });
 
     if (error) {

@@ -1,3 +1,4 @@
+import getPaymentByIdSchema from '../validators/get-payment-by-id.validator.js';
 import BaseCommand from './base.command.js';
 
 export default class GetPaymentByIdCommand extends BaseCommand {
@@ -8,9 +9,11 @@ export default class GetPaymentByIdCommand extends BaseCommand {
 
   async execute(id) {
     try {
-      this.logger.debug('Executing command', { paymentId: id });
+      const validatedData = this.validate(getPaymentByIdSchema, { id });
 
-      return await this.getPaymentByIdService.execute(id);
+      this.logger.debug('Executing command', { paymentId: validatedData.id });
+
+      return await this.getPaymentByIdService.execute(validatedData.id);
     } catch (error) {
       return this.handleError(error, { paymentId: id });
     }
