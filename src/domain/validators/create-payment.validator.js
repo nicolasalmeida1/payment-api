@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import { PaymentMethod } from '../enums/index.js';
 
 export const createPaymentSchema = Joi.object({
   id: Joi.string().uuid().required().messages({
@@ -20,10 +21,13 @@ export const createPaymentSchema = Joi.object({
     'number.positive': 'amount must be a positive number',
     'any.required': 'amount is required',
   }),
-  paymentMethod: Joi.string().valid('PIX', 'CREDIT_CARD').required().messages({
-    'any.only': 'paymentMethod must be PIX or CREDIT_CARD',
-    'any.required': 'paymentMethod is required',
-  }),
+  paymentMethod: Joi.string()
+    .valid(...Object.values(PaymentMethod))
+    .required()
+    .messages({
+      'any.only': 'paymentMethod must be PIX or CREDIT_CARD',
+      'any.required': 'paymentMethod is required',
+    }),
 });
 
 export default createPaymentSchema;

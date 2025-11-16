@@ -1,9 +1,12 @@
 import Joi from 'joi';
+import { PaymentStatus } from '../enums/index.js';
 
 export const updatePaymentSchema = Joi.object({
-  status: Joi.string().valid('PENDING', 'PAID', 'FAIL').messages({
-    'any.only': 'status must be PENDING, PAID or FAIL',
-  }),
+  status: Joi.string()
+    .valid(...Object.values(PaymentStatus))
+    .messages({
+      'any.only': 'status must be PENDING, PAID or FAIL',
+    }),
   description: Joi.string().min(1).messages({
     'string.empty': 'description cannot be empty',
   }),
