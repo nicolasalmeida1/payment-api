@@ -17,6 +17,7 @@
     "migrate:up": "knex migrate:latest --knexfile ./src/db/knexfile.cjs",
     "migrate:down": "knex migrate:rollback",
     "seed:run": "knex seed:run",
+    "worker": "node src/temporal/start-worker.js",
     "temporal:worker": "node src/temporal/start-worker.js",
     "temporal:dev": "temporal server start-dev"
   },
@@ -40,6 +41,7 @@
     "@babel/core": "^7.28.5",
     "@babel/preset-env": "^7.28.5",
     "@babel/register": "^7.28.3",
+    "@temporalio/testing": "^1.13.2",
     "coverage": "^0.4.1",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
