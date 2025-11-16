@@ -14,7 +14,6 @@ describe('GetPaymentByIdCommand', () => {
       getPaymentByIdService: mockGetPaymentByIdService,
     });
 
-    // Mock logger methods
     command.logger = {
       info: jest.fn(),
       error: jest.fn(),

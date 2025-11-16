@@ -3,7 +3,7 @@ import Logger from '../../infrastructure/logger/logger.js';
 export default class ListPaymentsService {
   constructor({ paymentRepository }) {
     this.paymentRepository = paymentRepository;
-    this.logger = new Logger('ListPaymentsService');
+    this.logger = new Logger(this.constructor.name);
   }
 
   async execute(filters) {

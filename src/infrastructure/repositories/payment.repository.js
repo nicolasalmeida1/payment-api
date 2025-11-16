@@ -4,7 +4,7 @@ import Logger from '../logger/logger.js';
 export default class PaymentRepository {
   constructor(db) {
     this.db = db;
-    this.logger = new Logger('PaymentRepository');
+    this.logger = new Logger(this.constructor.name);
   }
 
   async createWithHistory(paymentData) {

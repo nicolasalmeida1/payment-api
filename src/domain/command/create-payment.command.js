@@ -4,7 +4,7 @@ import Logger from '../../infrastructure/logger/logger.js';
 export default class CreatePaymentCommand {
   constructor({ createPaymentService }) {
     this.createPaymentService = createPaymentService;
-    this.logger = new Logger('CreatePaymentCommand');
+    this.logger = new Logger(this.constructor.name);
   }
 
   async execute(input) {

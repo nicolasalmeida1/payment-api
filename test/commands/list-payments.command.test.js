@@ -14,7 +14,6 @@ describe('ListPaymentsCommand', () => {
       listPaymentsService: mockListPaymentsService,
     });
 
-    // Mock logger methods
     command.logger = {
       info: jest.fn(),
       error: jest.fn(),

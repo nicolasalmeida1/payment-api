@@ -4,7 +4,7 @@ export default class CreatePaymentService {
   constructor({ paymentRepository, paymentHistoryRepository }) {
     this.paymentRepository = paymentRepository;
     this.paymentHistoryRepository = paymentHistoryRepository;
-    this.logger = new Logger('CreatePaymentService');
+    this.logger = new Logger(this.constructor.name);
   }
 
   async execute(validatedData) {

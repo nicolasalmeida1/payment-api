@@ -34,7 +34,8 @@ import Logger from '../infrastructure/logger/logger.js';
 
 class MyService {
   constructor() {
-    this.logger = new Logger('MyService');
+    // Usa this.constructor.name para pegar o nome da classe automaticamente
+    this.logger = new Logger(this.constructor.name);
   }
 
   async execute() {
@@ -135,7 +136,7 @@ export default class CreatePaymentService {
   constructor({ paymentRepository, paymentHistoryRepository }) {
     this.paymentRepository = paymentRepository;
     this.paymentHistoryRepository = paymentHistoryRepository;
-    this.logger = new Logger('CreatePaymentService');
+    this.logger = new Logger(this.constructor.name);
   }
 
   async execute(validatedData) {

@@ -21,7 +21,6 @@ describe('UpdatePaymentService', () => {
       paymentHistoryRepository: mockPaymentHistoryRepository,
     });
 
-    // Mock logger methods
     service.logger = {
       info: jest.fn(),
       error: jest.fn(),

@@ -3,7 +3,7 @@ import Logger from '../../infrastructure/logger/logger.js';
 export default class GetPaymentByIdCommand {
   constructor({ getPaymentByIdService }) {
     this.getPaymentByIdService = getPaymentByIdService;
-    this.logger = new Logger('GetPaymentByIdCommand');
+    this.logger = new Logger(this.constructor.name);
   }
 
   async execute(id) {
