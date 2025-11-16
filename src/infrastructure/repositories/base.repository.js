@@ -1,6 +1,14 @@
 import Logger from '../logger/logger.js';
 
+/**
+ * Base repository class providing transaction management
+ * @class BaseRepository
+ */
 export default class BaseRepository {
+  /**
+   * Creates an instance of BaseRepository
+   * @param {*} db - Database connection instance
+   */
   constructor(db) {
     this.db = db;
     this.logger = new Logger(this.constructor.name);
@@ -8,6 +16,10 @@ export default class BaseRepository {
     this.isTransactionOwner = false;
   }
 
+  /**
+   * Starts a new database transaction
+   * @returns {Promise<*>} Transaction object
+   */
   async startTransaction() {
     if (this.trx) {
       this.logger.debug('Reusing existing transaction');
@@ -22,6 +34,10 @@ export default class BaseRepository {
     return this.trx;
   }
 
+  /**
+   * Commits the current transaction
+   * @returns {Promise<void>}
+   */
   async commitTransaction() {
     if (!this.trx) {
       this.logger.warn('No transaction to commit');
@@ -41,6 +57,10 @@ export default class BaseRepository {
     this.isTransactionOwner = false;
   }
 
+  /**
+   * Rolls back the current transaction
+   * @returns {Promise<void>}
+   */
   async rollbackTransaction() {
     if (!this.trx) {
       this.logger.warn('No transaction to rollback');
@@ -60,6 +80,11 @@ export default class BaseRepository {
     this.isTransactionOwner = false;
   }
 
+  /**
+   * Sets an external transaction for this repository
+   * @param {*} trx - Transaction object from another repository
+   * @returns {void}
+   */
   setTransaction(trx) {
     this.trx = trx;
     this.isTransactionOwner = false;

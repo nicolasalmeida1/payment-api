@@ -5,7 +5,15 @@ import PaymentHistoryRepository from '../repositories/payment-history.repository
 import MercadoPagoService from '../services/mercado-pago.service.js';
 import db from '../../db/connection.js';
 
+/**
+ * Factory for creating CreatePaymentCommand with all dependencies
+ * @class CreatePaymentCommandFactory
+ */
 export default class CreatePaymentCommandFactory {
+  /**
+   * Creates a fully configured CreatePaymentCommand instance
+   * @returns {CreatePaymentCommand} Configured command instance
+   */
   static create() {
     const paymentRepository = new PaymentRepository(db);
     const paymentHistoryRepository = new PaymentHistoryRepository(db);

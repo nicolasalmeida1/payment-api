@@ -3,12 +3,24 @@ import { randomUUID } from 'crypto';
 
 const globalCallCounts = new Map();
 
+/**
+ * Mock service simulating Mercado Pago API for testing and development
+ * @class MercadoPagoMockService
+ */
 export default class MercadoPagoMockService {
+  /**
+   * Creates an instance of MercadoPagoMockService
+   */
   constructor() {
     this.logger = new Logger('MercadoPagoMockService');
     this.callCounts = globalCallCounts;
   }
 
+  /**
+   * Creates a mock payment preference
+   * @param {Payment} payment - Payment object
+   * @returns {Promise<MercadoPagoPreference>} Mock preference data
+   */
   async createPreference(payment) {
     this.logger.info('[MOCK] Creating Mercado Pago preference', {
       paymentId: payment.id,
@@ -33,6 +45,11 @@ export default class MercadoPagoMockService {
     return mockResponse;
   }
 
+  /**
+   * Gets a mock preference by ID
+   * @param {string} preferenceId - Preference identifier
+   * @returns {Promise<MercadoPagoPreference>} Mock preference data
+   */
   async getPreference(preferenceId) {
     this.logger.info('[MOCK] Getting Mercado Pago preference', { preferenceId });
 
@@ -52,6 +69,12 @@ export default class MercadoPagoMockService {
     };
   }
 
+  /**
+   * Gets mock payment status (simulates status progression)
+   * First call returns 'pending', subsequent calls return 'approved'
+   * @param {string} paymentId - Payment identifier
+   * @returns {Promise<MercadoPagoPayment>} Mock payment data
+   */
   async getPayment(paymentId) {
     this.logger.info('[MOCK] Getting Mercado Pago payment', { paymentId });
 
@@ -80,12 +103,21 @@ export default class MercadoPagoMockService {
     };
   }
 
+  /**
+   * Simulates API delay
+   * @param {number} ms - Milliseconds to delay
+   * @returns {Promise<void>}
+   */
   async delay(ms) {
     return new Promise(resolve => {
       setTimeout(resolve, ms);
     });
   }
 
+  /**
+   * Resets call counter for testing purposes
+   * @returns {void}
+   */
   resetCallCounts() {
     this.callCounts.clear();
     this.logger.info('[MOCK] Call counts reset');

@@ -1,7 +1,14 @@
 import Logger from '../logger/logger.js';
 import { MercadoPagoRoutes } from '../../domain/enums/mercado-pago-routes.enum.js';
 
+/**
+ * Service for integrating with Mercado Pago API
+ * @class MercadoPagoService
+ */
 export default class MercadoPagoService {
+  /**
+   * Creates an instance of MercadoPagoService
+   */
   constructor() {
     this.logger = new Logger('MercadoPagoService');
     this.baseUrl = process.env.MERCADO_PAGO_BASE_URL || 'https://api.mercadopago.com';
@@ -12,6 +19,12 @@ export default class MercadoPagoService {
     }
   }
 
+  /**
+   * Creates a payment preference in Mercado Pago
+   * @param {Payment} payment - Payment object
+   * @returns {Promise<MercadoPagoPreference>} Created preference
+   * @throws {Error} If API request fails
+   */
   async createPreference(payment) {
     this.logger.debug('Creating Mercado Pago preference', {
       paymentId: payment.id,
@@ -57,6 +70,11 @@ export default class MercadoPagoService {
     }
   }
 
+  /**
+   * Builds preference data for Mercado Pago API
+   * @param {Payment} payment - Payment object
+   * @returns {MercadoPagoPreferenceData} Preference data
+   */
   buildPreferenceData(payment) {
     this.logger.debug('Building preference data', { paymentId: payment.id });
 
@@ -96,10 +114,21 @@ export default class MercadoPagoService {
     return preferenceData;
   }
 
+  /**
+   * Extracts a dummy email from CPF for Mercado Pago
+   * @param {string} cpf - Customer CPF
+   * @returns {string} Generated email address
+   */
   extractEmailFromCpf(cpf) {
     return `${cpf}@payment-api.com`;
   }
 
+  /**
+   * Retrieves a preference from Mercado Pago
+   * @param {string} preferenceId - Preference identifier
+   * @returns {Promise<MercadoPagoPreference>} Preference data
+   * @throws {Error} If API request fails
+   */
   async getPreference(preferenceId) {
     this.logger.debug('Getting Mercado Pago preference', { preferenceId });
 
@@ -138,6 +167,12 @@ export default class MercadoPagoService {
     }
   }
 
+  /**
+   * Retrieves payment information from Mercado Pago
+   * @param {string} paymentId - Payment identifier
+   * @returns {Promise<MercadoPagoPayment>} Payment data
+   * @throws {Error} If API request fails
+   */
   async getPayment(paymentId) {
     this.logger.debug('Getting Mercado Pago payment', { paymentId });
 

@@ -4,7 +4,15 @@ import PaymentRepository from '../repositories/payment.repository.js';
 import PaymentHistoryRepository from '../repositories/payment-history.repository.js';
 import db from '../../db/connection.js';
 
+/**
+ * Factory for creating UpdatePaymentCommand with all dependencies
+ * @class UpdatePaymentCommandFactory
+ */
 export default class UpdatePaymentCommandFactory {
+  /**
+   * Creates a fully configured UpdatePaymentCommand instance
+   * @returns {UpdatePaymentCommand} Configured command instance
+   */
   static create() {
     const paymentRepository = new PaymentRepository(db);
     const paymentHistoryRepository = new PaymentHistoryRepository(db);

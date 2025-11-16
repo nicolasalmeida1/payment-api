@@ -1,7 +1,17 @@
 import Payment from '../../db/models/payment.js';
 import BaseRepository from './base.repository.js';
 
+/**
+ * Repository for managing payment records
+ * @class PaymentRepository
+ * @extends BaseRepository
+ */
 export default class PaymentRepository extends BaseRepository {
+  /**
+   * Creates a new payment record
+   * @param {PaymentData} paymentData - Payment data to insert
+   * @returns {Promise<Payment>} Created payment record
+   */
   async create(paymentData) {
     this.logger.debug('Creating payment', { paymentId: paymentData.id });
 
@@ -11,6 +21,11 @@ export default class PaymentRepository extends BaseRepository {
     return createdPayment;
   }
 
+  /**
+   * Finds a payment by its ID
+   * @param {string} id - Payment identifier
+   * @returns {Promise<Payment|null>} Payment record or null if not found
+   */
   async findById(id) {
     this.logger.debug('Finding payment by id', { paymentId: id });
     const payment = await Payment.query().findById(id);
@@ -24,6 +39,12 @@ export default class PaymentRepository extends BaseRepository {
     return payment;
   }
 
+  /**
+   * Updates a payment record
+   * @param {string} id - Payment identifier
+   * @param {Partial<PaymentData>} paymentData - Data to update
+   * @returns {Promise<Payment|null>} Updated payment or null if not found
+   */
   async update(id, paymentData) {
     this.logger.debug('Updating payment', { paymentId: id, ...paymentData });
 
@@ -40,6 +61,12 @@ export default class PaymentRepository extends BaseRepository {
     return Payment.query(this.trx).findById(id);
   }
 
+  /**
+   * Applies filters to a query
+   * @param {*} query - Query builder instance
+   * @param {RepositoryFilters} filters - Filters to apply
+   * @returns {*} Modified query builder
+   */
   applyFilters(query, filters) {
     if (filters.cpf) {
       query = query.where('cpf', filters.cpf);
@@ -56,6 +83,11 @@ export default class PaymentRepository extends BaseRepository {
     return query;
   }
 
+  /**
+   * Finds all payments with optional filtering and pagination
+   * @param {RepositoryFilters} [filters={}] - Filter and pagination options
+   * @returns {Promise<Payment[]>} Array of payment records
+   */
   async findAll(filters = {}) {
     this.logger.debug('Finding payments', { filters });
 

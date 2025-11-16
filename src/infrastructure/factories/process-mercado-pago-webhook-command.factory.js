@@ -5,7 +5,15 @@ import PaymentHistoryRepository from '../repositories/payment-history.repository
 import MercadoPagoService from '../services/mercado-pago.service.js';
 import db from '../../db/connection.js';
 
+/**
+ * Factory for creating ProcessMercadoPagoWebhookCommand with all dependencies
+ * @class ProcessMercadoPagoWebhookCommandFactory
+ */
 export default class ProcessMercadoPagoWebhookCommandFactory {
+  /**
+   * Creates a fully configured ProcessMercadoPagoWebhookCommand instance
+   * @returns {ProcessMercadoPagoWebhookCommand} Configured command instance
+   */
   static create() {
     const paymentRepository = new PaymentRepository(db);
     const paymentHistoryRepository = new PaymentHistoryRepository(db);
