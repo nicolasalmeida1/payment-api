@@ -1,0 +1,174 @@
+import db from '../../db/connection.js';
+import PaymentRepository from '../../infrastructure/repositories/payment.repository.js';
+import PaymentHistoryRepository from '../../infrastructure/repositories/payment-history.repository.js';
+import MercadoPagoService from '../../infrastructure/services/mercado-pago.service.js';
+import { PaymentStatus, PaymentEvent } from '../../domain/enums/index.js';
+import Logger from '../../infrastructure/logger/logger.js';
+
+const logger = new Logger('PaymentActivities');
+
+// Activities devem ser funções puras que podem ser retentadas
+export async function createPaymentRecord(paymentData) {
+  logger.info('Creating payment record in database', { paymentId: paymentData.id });
+
+  const paymentRepository = new PaymentRepository(db);
+  const paymentHistoryRepository = new PaymentHistoryRepository(db);
+
+  try {
+    await paymentRepository.startTransaction();
+    paymentHistoryRepository.setTransaction(paymentRepository.trx);
+
+    const payment = await paymentRepository.create(paymentData);
+
+    const historyData = {
+      payment_id: payment.id,
+      event: PaymentEvent.PAYMENT_CREATED,
+      event_data: {
+        cpf: payment.cpf,
+        description: payment.description,
+        amount: payment.amount,
+        payment_method: payment.payment_method,
+        status: payment.status,
+      },
+    };
+
+    await paymentHistoryRepository.create(historyData);
+    await paymentRepository.commitTransaction();
+
+    logger.info('Payment record created successfully', { paymentId: payment.id });
+
+    return payment;
+  } catch (error) {
+    await paymentRepository.rollbackTransaction();
+    logger.error('Error creating payment record', {
+      error: error.message,
+      stack: error.stack,
+      paymentId: paymentData.id,
+    });
+    throw error;
+  }
+}
+
+export async function createMercadoPagoPreference(payment) {
+  logger.info('Creating Mercado Pago preference', { paymentId: payment.id });
+
+  const mercadoPagoService = new MercadoPagoService();
+
+  try {
+    const preference = await mercadoPagoService.createPreference(payment);
+
+    logger.info('Mercado Pago preference created', {
+      paymentId: payment.id,
+      preferenceId: preference.id,
+    });
+
+    return {
+      preference_id: preference.id,
+      init_point: preference.init_point,
+      sandbox_init_point: preference.sandbox_init_point,
+    };
+  } catch (error) {
+    logger.error('Error creating Mercado Pago preference', {
+      error: error.message,
+      stack: error.stack,
+      paymentId: payment.id,
+    });
+    throw error;
+  }
+}
+
+export async function checkPaymentStatus(mercadoPagoPaymentId) {
+  logger.info('Checking payment status on Mercado Pago', { mercadoPagoPaymentId });
+
+  const mercadoPagoService = new MercadoPagoService();
+
+  try {
+    const payment = await mercadoPagoService.getPayment(mercadoPagoPaymentId);
+
+    logger.info('Payment status retrieved', {
+      mercadoPagoPaymentId,
+      status: payment.status,
+    });
+
+    return {
+      status: payment.status,
+      external_reference: payment.external_reference,
+      transaction_amount: payment.transaction_amount,
+    };
+  } catch (error) {
+    logger.error('Error checking payment status', {
+      error: error.message,
+      stack: error.stack,
+      mercadoPagoPaymentId,
+    });
+    throw error;
+  }
+}
+
+export async function updatePaymentStatus(paymentId, newStatus, mercadoPagoData) {
+  logger.info('Updating payment status', { paymentId, newStatus });
+
+  const paymentRepository = new PaymentRepository(db);
+  const paymentHistoryRepository = new PaymentHistoryRepository(db);
+
+  try {
+    await paymentRepository.startTransaction();
+    paymentHistoryRepository.setTransaction(paymentRepository.trx);
+
+    const payment = await paymentRepository.findById(paymentId);
+
+    if (!payment) {
+      throw new Error(`Payment not found: ${paymentId}`);
+    }
+
+    const oldStatus = payment.status;
+
+    await paymentRepository.update(paymentId, { status: newStatus });
+
+    const historyData = {
+      payment_id: paymentId,
+      event: PaymentEvent.STATUS_CHANGED,
+      event_data: {
+        old_status: oldStatus,
+        new_status: newStatus,
+        mercado_pago_status: mercadoPagoData?.status,
+        mercado_pago_payment_id: mercadoPagoData?.id,
+      },
+    };
+
+    await paymentHistoryRepository.create(historyData);
+    await paymentRepository.commitTransaction();
+
+    logger.info('Payment status updated successfully', {
+      paymentId,
+      oldStatus,
+      newStatus,
+    });
+
+    return { success: true, oldStatus, newStatus };
+  } catch (error) {
+    await paymentRepository.rollbackTransaction();
+    logger.error('Error updating payment status', {
+      error: error.message,
+      stack: error.stack,
+      paymentId,
+    });
+    throw error;
+  }
+}
+
+export function mapMercadoPagoStatusToPaymentStatus(mercadoPagoStatus) {
+  const statusMap = {
+    approved: PaymentStatus.PAID,
+    rejected: PaymentStatus.FAIL,
+    cancelled: PaymentStatus.FAIL,
+    refunded: PaymentStatus.FAIL,
+    charged_back: PaymentStatus.FAIL,
+    pending: PaymentStatus.PENDING,
+    in_process: PaymentStatus.PENDING,
+    in_mediation: PaymentStatus.PENDING,
+    authorized: PaymentStatus.PENDING,
+  };
+
+  return statusMap[mercadoPagoStatus] || PaymentStatus.PENDING;
+}
