@@ -50,7 +50,11 @@ describe('ListPaymentsCommand', () => {
       const result = await command.execute(filters);
 
       expect(result).toEqual(expectedResult);
-      expect(mockListPaymentsService.execute).toHaveBeenCalledWith(filters);
+      expect(mockListPaymentsService.execute).toHaveBeenCalledWith({
+        ...filters,
+        page: 1,
+        take: 10,
+      });
     });
 
     it('should execute command without filters', async () => {
@@ -76,7 +80,10 @@ describe('ListPaymentsCommand', () => {
       const result = await command.execute(filters);
 
       expect(result).toEqual(expectedResult);
-      expect(mockListPaymentsService.execute).toHaveBeenCalledWith(filters);
+      expect(mockListPaymentsService.execute).toHaveBeenCalledWith({
+        page: 1,
+        take: 10,
+      });
     });
 
     it('should throw validation error for invalid cpf', async () => {
@@ -88,6 +95,26 @@ describe('ListPaymentsCommand', () => {
         'Validation failed:',
       );
       expect(mockListPaymentsService.execute).not.toHaveBeenCalled();
+    });
+
+    it('should execute command with custom pagination', async () => {
+      const filters = {
+        page: 2,
+        take: 20,
+      };
+
+      const expectedResult = {
+        success: true,
+        data: [],
+        count: 0,
+      };
+
+      mockListPaymentsService.execute.mockResolvedValue(expectedResult);
+
+      const result = await command.execute(filters);
+
+      expect(result).toEqual(expectedResult);
+      expect(mockListPaymentsService.execute).toHaveBeenCalledWith(filters);
     });
 
     it('should throw validation error for invalid paymentMethod', async () => {

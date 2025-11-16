@@ -10,7 +10,11 @@ describe('ListPaymentsValidator', () => {
       const { error, value } = listPaymentsSchema.validate(validData);
 
       expect(error).toBeUndefined();
-      expect(value).toEqual(validData);
+      expect(value).toEqual({
+        ...validData,
+        page: 1,
+        take: 10,
+      });
     });
 
     it('should validate with paymentMethod filter', () => {
@@ -48,9 +52,47 @@ describe('ListPaymentsValidator', () => {
     it('should validate with no filters', () => {
       const validData = {};
 
-      const { error } = listPaymentsSchema.validate(validData);
+      const { error, value } = listPaymentsSchema.validate(validData);
 
       expect(error).toBeUndefined();
+      expect(value).toEqual({
+        page: 1,
+        take: 10,
+      });
+    });
+
+    it('should validate with custom page and take', () => {
+      const validData = {
+        page: 2,
+        take: 20,
+      };
+
+      const { error, value } = listPaymentsSchema.validate(validData);
+
+      expect(error).toBeUndefined();
+      expect(value).toEqual(validData);
+    });
+
+    it('should fail when page is less than 1', () => {
+      const invalidData = {
+        page: 0,
+      };
+
+      const { error } = listPaymentsSchema.validate(invalidData);
+
+      expect(error).toBeDefined();
+      expect(error.details[0].message).toBe('page must be at least 1');
+    });
+
+    it('should fail when take exceeds 100', () => {
+      const invalidData = {
+        take: 101,
+      };
+
+      const { error } = listPaymentsSchema.validate(invalidData);
+
+      expect(error).toBeDefined();
+      expect(error.details[0].message).toBe('take must not exceed 100');
     });
   });
 

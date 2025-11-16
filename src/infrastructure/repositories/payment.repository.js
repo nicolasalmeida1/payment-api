@@ -61,11 +61,17 @@ export default class PaymentRepository extends BaseRepository {
   async findAll(filters = {}) {
     this.logger.debug('Finding payments', { filters });
 
-    const query = Payment.query();
-    const queryWithFilters = this.applyFilters(query, filters);
-    const payments = await queryWithFilters;
+    const { page = 1, take = 10, ...otherFilters } = filters;
 
-    this.logger.debug('Payments found', { count: payments.length });
+    let query = Payment.query();
+    query = this.applyFilters(query, otherFilters);
+
+    const limit = take;
+    const offset = (page - 1) * take;
+
+    const payments = await query.limit(limit).offset(offset);
+
+    this.logger.debug('Payments found', { count: payments.length, page, take });
 
     return payments;
   }

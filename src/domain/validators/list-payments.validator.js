@@ -17,6 +17,17 @@ export const listPaymentsSchema = Joi.object({
     .messages({
       'any.only': 'status must be PENDING, PAID or FAIL',
     }),
+  page: Joi.number().integer().min(1).default(1).messages({
+    'number.base': 'page must be a number',
+    'number.integer': 'page must be an integer',
+    'number.min': 'page must be at least 1',
+  }),
+  take: Joi.number().integer().min(1).max(100).default(10).messages({
+    'number.base': 'take must be a number',
+    'number.integer': 'take must be an integer',
+    'number.min': 'take must be at least 1',
+    'number.max': 'take must not exceed 100',
+  }),
 });
 
 export default listPaymentsSchema;
