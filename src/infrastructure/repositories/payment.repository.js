@@ -58,11 +58,7 @@ export default class PaymentRepository {
     });
   }
 
-  async findAll(filters = {}) {
-    this.logger.debug('Finding payments', { filters });
-
-    let query = Payment.query();
-
+  applyFilters(query, filters) {
     if (filters.cpf) {
       query = query.where('cpf', filters.cpf);
     }
@@ -75,7 +71,15 @@ export default class PaymentRepository {
       query = query.where('status', filters.status);
     }
 
-    const payments = await query;
+    return query;
+  }
+
+  async findAll(filters = {}) {
+    this.logger.debug('Finding payments', { filters });
+
+    const query = Payment.query();
+    const queryWithFilters = this.applyFilters(query, filters);
+    const payments = await queryWithFilters;
 
     this.logger.debug('Payments found', { count: payments.length });
 
