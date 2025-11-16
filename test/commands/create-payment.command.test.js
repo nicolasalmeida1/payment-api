@@ -13,6 +13,14 @@ describe('CreatePaymentCommand', () => {
     command = new CreatePaymentCommand({
       createPaymentService: mockCreatePaymentService,
     });
+
+    // Mock logger methods
+    command.logger = {
+      info: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      debug: jest.fn(),
+    };
   });
 
   describe('execute', () => {

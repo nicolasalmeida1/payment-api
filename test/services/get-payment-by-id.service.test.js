@@ -13,6 +13,14 @@ describe('GetPaymentByIdService', () => {
     service = new GetPaymentByIdService({
       paymentRepository: mockPaymentRepository,
     });
+
+    // Mock logger methods
+    service.logger = {
+      info: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      debug: jest.fn(),
+    };
   });
 
   describe('execute', () => {

@@ -19,6 +19,12 @@ describe('CreatePaymentService', () => {
       paymentRepository: mockPaymentRepository,
       paymentHistoryRepository: mockPaymentHistoryRepository,
     });
+
+    // Mock logger methods
+    service.logger = {
+      info: jest.fn(),
+      error: jest.fn(),
+    };
   });
 
   describe('execute', () => {
@@ -50,6 +56,19 @@ describe('CreatePaymentService', () => {
         success: true,
         data: expectedPayment,
       });
+
+      expect(service.logger.info).toHaveBeenCalledWith('Creating payment', {
+        paymentId: validatedData.id,
+        cpf: validatedData.cpf,
+        amount: validatedData.amount,
+      });
+
+      expect(service.logger.info).toHaveBeenCalledWith(
+        'Payment created successfully',
+        {
+          paymentId: expectedPayment.id,
+        },
+      );
 
       expect(mockPaymentRepository.createWithHistory).toHaveBeenCalledWith(
         {
@@ -89,6 +108,15 @@ describe('CreatePaymentService', () => {
 
       await expect(service.execute(validatedData)).rejects.toThrow(
         'Database error',
+      );
+
+      expect(service.logger.error).toHaveBeenCalledWith(
+        'Error creating payment',
+        {
+          error: error.message,
+          stack: error.stack,
+          paymentId: validatedData.id,
+        },
       );
     });
   });
