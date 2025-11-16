@@ -16,11 +16,17 @@
     "migrate:create": "knex --knexfile ./src/db/knexfile.js migrate:make",
     "migrate:up": "knex migrate:latest --knexfile ./src/db/knexfile.cjs",
     "migrate:down": "knex migrate:rollback",
-    "seed:run": "knex seed:run"
+    "seed:run": "knex seed:run",
+    "temporal:worker": "node src/temporal/start-worker.js",
+    "temporal:dev": "temporal server start-dev"
   },
   "author": "Nicolas Gabriel de Almeida",
   "license": "ISC",
   "dependencies": {
+    "@temporalio/activity": "^1.13.2",
+    "@temporalio/client": "^1.13.2",
+    "@temporalio/worker": "^1.13.2",
+    "@temporalio/workflow": "^1.13.2",
     "dotenv": "^17.2.3",
     "fastify": "^5.6.2",
     "joi": "^18.0.1",
@@ -40,6 +46,7 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-prettier": "^5.5.4",
     "jest": "^30.2.0",
+    "nock": "^14.0.10",
     "prettier": "3.6.2"
   }
 }
