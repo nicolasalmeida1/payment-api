@@ -8,6 +8,31 @@ export default class CreatePaymentService {
     this.logger = new Logger(this.constructor.name);
   }
 
+  getPaymentData(validatedData) {
+    return {
+      id: validatedData.id,
+      cpf: validatedData.cpf,
+      description: validatedData.description,
+      amount: validatedData.amount,
+      payment_method: validatedData.paymentMethod,
+      status: PaymentStatus.PENDING,
+    };
+  }
+
+  getHistoryData(validatedData) {
+    return {
+      payment_id: validatedData.id,
+      event: PaymentEvent.PAYMENT_CREATED,
+      event_data: {
+        cpf: validatedData.cpf,
+        description: validatedData.description,
+        amount: validatedData.amount,
+        payment_method: validatedData.paymentMethod,
+        status: PaymentStatus.PENDING,
+      },
+    };
+  }
+
   async execute(validatedData) {
     this.logger.info('Creating payment', {
       paymentId: validatedData.id,
@@ -16,26 +41,8 @@ export default class CreatePaymentService {
     });
 
     try {
-      const paymentData = {
-        id: validatedData.id,
-        cpf: validatedData.cpf,
-        description: validatedData.description,
-        amount: validatedData.amount,
-        payment_method: validatedData.paymentMethod,
-        status: PaymentStatus.PENDING,
-      };
-
-      const historyData = {
-        payment_id: validatedData.id,
-        event: PaymentEvent.PAYMENT_CREATED,
-        event_data: {
-          cpf: validatedData.cpf,
-          description: validatedData.description,
-          amount: validatedData.amount,
-          payment_method: validatedData.paymentMethod,
-          status: PaymentStatus.PENDING,
-        },
-      };
+      const paymentData = this.getPaymentData(validatedData);
+      const historyData = this.getHistoryData(validatedData);
 
       const payment = await this.paymentRepository.createWithHistory(
         paymentData,
