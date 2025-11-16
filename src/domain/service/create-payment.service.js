@@ -1,4 +1,5 @@
 import Logger from '../../infrastructure/logger/logger.js';
+import { PaymentStatus, PaymentEvent } from '../enums/index.js';
 
 export default class CreatePaymentService {
   constructor({ paymentRepository, paymentHistoryRepository }) {
@@ -21,18 +22,18 @@ export default class CreatePaymentService {
         description: validatedData.description,
         amount: validatedData.amount,
         payment_method: validatedData.paymentMethod,
-        status: 'PENDING',
+        status: PaymentStatus.PENDING,
       };
 
       const historyData = {
         payment_id: validatedData.id,
-        event: 'PAYMENT_CREATED',
+        event: PaymentEvent.PAYMENT_CREATED,
         event_data: {
           cpf: validatedData.cpf,
           description: validatedData.description,
           amount: validatedData.amount,
           payment_method: validatedData.paymentMethod,
-          status: 'PENDING',
+          status: PaymentStatus.PENDING,
         },
       };
 

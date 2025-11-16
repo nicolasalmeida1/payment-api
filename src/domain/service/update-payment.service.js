@@ -1,4 +1,5 @@
 import Logger from '../../infrastructure/logger/logger.js';
+import { PaymentEvent } from '../enums/index.js';
 
 export default class UpdatePaymentService {
   constructor({ paymentRepository, paymentHistoryRepository }) {
@@ -41,7 +42,7 @@ export default class UpdatePaymentService {
 
         await this.paymentHistoryRepository.create({
           payment_id: id,
-          event: 'PAYMENT_STATUS_CHANGED',
+          event: PaymentEvent.PAYMENT_STATUS_CHANGED,
           event_data: {
             old_status: existingPayment.status,
             new_status: validatedData.status,
