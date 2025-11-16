@@ -1,39 +1,20 @@
 import listPaymentsSchema from '../validators/list-payments.validator.js';
-import Logger from '../../infrastructure/logger/logger.js';
+import BaseCommand from './base.command.js';
 
-export default class ListPaymentsCommand {
+export default class ListPaymentsCommand extends BaseCommand {
   constructor({ listPaymentsService }) {
+    super();
     this.listPaymentsService = listPaymentsService;
-    this.logger = new Logger(this.constructor.name);
   }
 
   async execute(filters) {
     try {
-      this.logger.debug('Validating list payments filters', { filters });
-
-      const { error, value } = listPaymentsSchema.validate(filters, {
-        abortEarly: false,
+      const validatedData = this.validate(listPaymentsSchema, filters, {
+        filters,
       });
-
-      if (error) {
-        const errorMessages = error.details.map((detail) => detail.message);
-        this.logger.warn('Validation failed', {
-          errors: errorMessages,
-          filters,
-        });
-        throw new Error(`Validation failed: ${errorMessages.join(', ')}`);
-      }
-
-      const result = await this.listPaymentsService.execute(value);
-
-      return result;
+      return await this.listPaymentsService.execute(validatedData);
     } catch (error) {
-      this.logger.error('Error in list payments command', {
-        error: error.message,
-        stack: error.stack,
-      });
-
-      throw error;
+      return this.handleError(error);
     }
   }
 }

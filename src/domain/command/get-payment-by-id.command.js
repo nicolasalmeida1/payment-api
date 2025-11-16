@@ -1,28 +1,17 @@
-import Logger from '../../infrastructure/logger/logger.js';
+import BaseCommand from './base.command.js';
 
-export default class GetPaymentByIdCommand {
+export default class GetPaymentByIdCommand extends BaseCommand {
   constructor({ getPaymentByIdService }) {
+    super();
     this.getPaymentByIdService = getPaymentByIdService;
-    this.logger = new Logger(this.constructor.name);
   }
 
   async execute(id) {
     try {
-      this.logger.debug('Executing get payment by id command', {
-        paymentId: id,
-      });
-
-      const result = await this.getPaymentByIdService.execute(id);
-
-      return result;
+      this.logger.debug('Executing command', { paymentId: id });
+      return await this.getPaymentByIdService.execute(id);
     } catch (error) {
-      this.logger.error('Error in get payment by id command', {
-        error: error.message,
-        stack: error.stack,
-        paymentId: id,
-      });
-
-      throw error;
+      return this.handleError(error, { paymentId: id });
     }
   }
 }
