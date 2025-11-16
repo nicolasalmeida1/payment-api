@@ -2,12 +2,14 @@ import db from '../../db/connection.js';
 import PaymentRepository from '../../infrastructure/repositories/payment.repository.js';
 import PaymentHistoryRepository from '../../infrastructure/repositories/payment-history.repository.js';
 import MercadoPagoService from '../../infrastructure/services/mercado-pago.service.js';
+import MercadoPagoMockService from '../../infrastructure/services/mercado-pago-mock.service.js';
 import { PaymentStatus, PaymentEvent } from '../../domain/enums/index.js';
 import Logger from '../../infrastructure/logger/logger.js';
 
 const logger = new Logger('PaymentActivities');
 
-// Activities devem ser funções puras que podem ser retentadas
+const useMock = !process.env.MERCADO_PAGO_ACCESS_TOKEN || process.env.USE_MERCADO_PAGO_MOCK === 'true';
+
 export async function createPaymentRecord(paymentData) {
   logger.info('Creating payment record in database', { paymentId: paymentData.id });
 
@@ -50,9 +52,7 @@ export async function createPaymentRecord(paymentData) {
 }
 
 export async function createMercadoPagoPreference(payment) {
-  logger.info('Creating Mercado Pago preference', { paymentId: payment.id });
-
-  const mercadoPagoService = new MercadoPagoService();
+  const mercadoPagoService = useMock ? new MercadoPagoMockService() : new MercadoPagoService();
 
   try {
     const preference = await mercadoPagoService.createPreference(payment);
@@ -78,9 +78,7 @@ export async function createMercadoPagoPreference(payment) {
 }
 
 export async function checkPaymentStatus(mercadoPagoPaymentId) {
-  logger.info('Checking payment status on Mercado Pago', { mercadoPagoPaymentId });
-
-  const mercadoPagoService = new MercadoPagoService();
+  const mercadoPagoService = useMock ? new MercadoPagoMockService() : new MercadoPagoService();
 
   try {
     const payment = await mercadoPagoService.getPayment(mercadoPagoPaymentId);
@@ -127,7 +125,7 @@ export async function updatePaymentStatus(paymentId, newStatus, mercadoPagoData)
 
     const historyData = {
       payment_id: paymentId,
-      event: PaymentEvent.STATUS_CHANGED,
+      event: PaymentEvent.PAYMENT_STATUS_CHANGED,
       event_data: {
         old_status: oldStatus,
         new_status: newStatus,
