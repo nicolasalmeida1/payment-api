@@ -9,6 +9,10 @@ export default class Payment extends Model {
     return 'id';
   }
 
+  $beforeUpdate() {
+    this.updatedAt = new Date();
+  }
+
   static get relationMappings() {
     return {
       history: {

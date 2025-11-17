@@ -1,5 +1,6 @@
 import knex from 'knex';
 import { Model } from 'objection';
+import { knexSnakeCaseMappers } from 'objection';
 import { env } from '../config/env.js';
 
 const connection = knex({
@@ -15,6 +16,7 @@ const connection = knex({
     directory: './migrations',
   },
   pool: { max: 10, min: 2 },
+  ...knexSnakeCaseMappers(),
 });
 
 Model.knex(connection);
