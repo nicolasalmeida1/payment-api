@@ -84,12 +84,6 @@ npm test:coverage
 
 - **[Quick Start Guide](docs/QUICKSTART.md)** - Comece em 5 minutos!
 
-### 📖 API Documentation
-
-- **[API CURL Examples](docs/API-CURL-EXAMPLES.md)** - Exemplos completos de CURL para todos os endpoints
-- **[Postman Collection](docs/Payment-API.postman_collection.json)** - Collection do Postman para importar
-- **[Postman Environment](docs/Payment-API-Local.postman_environment.json)** - Variáveis de ambiente
-
 ### ⚙️ Advanced
 
 - **[Temporal Integration](src/temporal/README.md)** - Documentação completa do Temporal.io
