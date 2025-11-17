@@ -15,7 +15,6 @@ export default class ProcessMercadoPagoWebhookCommand extends BaseCommand {
   constructor({ processMercadoPagoWebhookService }) {
     super();
     this.processMercadoPagoWebhookService = processMercadoPagoWebhookService;
-    this.context = 'ProcessMercadoPagoWebhookCommand';
   }
 
   /**
@@ -24,14 +23,14 @@ export default class ProcessMercadoPagoWebhookCommand extends BaseCommand {
    * @returns {Promise<CommandResult>} Command execution result
    */
   async execute(webhookData) {
-    const validatedData = this.validate(mercadoPagoWebhookSchema, webhookData, this.context);
+    const validatedData = this.validate(mercadoPagoWebhookSchema, webhookData);
 
     try {
       const result = await this.processMercadoPagoWebhookService.execute(validatedData);
 
       return result;
     } catch (error) {
-      this.handleError(error, this.context);
+      this.handleError(error);
 
       throw error;
     }

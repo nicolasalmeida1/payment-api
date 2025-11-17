@@ -32,6 +32,7 @@ export default class BaseCommand {
       const errorMessages = error.details.map(detail => detail.message);
       this.logger.warn('Validation failed', {
         errors: errorMessages,
+        name: this.constructor.name,
         ...context,
         input,
       });
@@ -52,6 +53,7 @@ export default class BaseCommand {
     this.logger.error(`Error in ${this.constructor.name}`, {
       error: error.message,
       stack: error.stack,
+      name: this.constructor.name,
       ...context,
     });
     throw error;

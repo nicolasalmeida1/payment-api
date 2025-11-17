@@ -157,7 +157,6 @@ describe('ProcessMercadoPagoWebhookCommand', () => {
   describe('constructor', () => {
     it('should initialize with service', () => {
       expect(command.processMercadoPagoWebhookService).toBe(mockService);
-      expect(command.context).toBe('ProcessMercadoPagoWebhookCommand');
     });
   });
 });
