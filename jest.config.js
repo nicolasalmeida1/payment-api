@@ -13,6 +13,7 @@ export default {
     '!src/db/**',
     '!src/domain/enum',
     '!src/infrastructure/routes/**',
+    '!src/temporal/**',
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
